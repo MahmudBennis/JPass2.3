@@ -34,6 +34,7 @@ public class GenerateShares extends JDialog implements ActionListener
     private final JButton generateButton;
     private  JButton[] copyShareButton;
     private JButton copyAllButton;
+    private JButton exportButton;
     private JToggleButton[] showShareButton;
     private JToggleButton showPasswordButton;
     private JPasswordField[] sharei;
@@ -65,7 +66,8 @@ public class GenerateShares extends JDialog implements ActionListener
 
         this.formData = null;
 
-        this.fieldPanel = new JPanel();
+        JPanel northPanel = new JPanel (new SpringLayout ());
+        this.fieldPanel = new JPanel(new SpringLayout ());
 
         this.fieldPanel.add(new JLabel("Second Master Password:"));
         this.passwordField = TextComponentFactory.newPasswordField(true);
@@ -84,8 +86,7 @@ public class GenerateShares extends JDialog implements ActionListener
         this.neededShares = TextComponentFactory.newTextField ();
         this.fieldPanel.add (this.neededShares);
 
-        this.fieldPanel.add(new JLabel(""));
-        this.buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 3, 0));
+        this.buttonsPanel = new JPanel(new GridLayout ());
 
         this.showPasswordButton = new JToggleButton("Show", MessageDialog.getIcon ("show"));
         this.showPasswordButton.setActionCommand ("show_button");
@@ -105,15 +106,19 @@ public class GenerateShares extends JDialog implements ActionListener
         copyAllButton.addActionListener(this);
         copyAllButton.setEnabled (false);
         this.buttonsPanel.add (this.copyAllButton);
-        this.fieldPanel.add (this.buttonsPanel);
 
-        this.fieldPanel.setLayout (new SpringLayout ());
-        SpringUtilities.makeCompactGrid (this.fieldPanel,
-                                         5, 2, //rows, columns
-                                         5, 5, //initX, initY
-                                         5, 5);    //xPad, yPad
+        exportButton = new JButton("Export", MessageDialog.getIcon("export"));
+        exportButton.setActionCommand("export_button");
+        exportButton.setMnemonic(KeyEvent.VK_C);
+        exportButton.addActionListener(this);
+        exportButton.setEnabled (false);
+        this.buttonsPanel.add (this.exportButton);
 
-        getContentPane().add (this.fieldPanel, BorderLayout.NORTH);
+        northPanel.add (this.fieldPanel);
+        northPanel.add (this.buttonsPanel);
+        SpringUtilities.makeCompactGrid (this.fieldPanel,4,2,5,5,5,5);
+        SpringUtilities.makeCompactGrid (northPanel,2,1,5,5,5,5);
+        getContentPane().add (northPanel, BorderLayout.NORTH);
 
         setSize(450, 400);
         setMinimumSize(new Dimension(370, 300));
@@ -186,6 +191,11 @@ public class GenerateShares extends JDialog implements ActionListener
         {
             copyEntryField (parent, String.valueOf (primeAndAllShares) );
         }
+        if ("export_button".equals (command))
+        {
+            writingShares();
+            MessageDialog.showInformationMessage (parent, "All shares has been exported into \"database\" file");
+        }
     }
 
     public void generateShares ()
@@ -224,6 +234,7 @@ public class GenerateShares extends JDialog implements ActionListener
             {
                 this.generateButton.setEnabled (false);
                 copyAllButton.setEnabled (true);
+                exportButton.setEnabled (true);
 
                 secMasterPassword = pass;
                 linkToFiles = link;
@@ -326,38 +337,32 @@ public class GenerateShares extends JDialog implements ActionListener
         StringBuilder primeAndShares = new StringBuilder (coPrimeNum);
 //        primeAndShares.append ("\n").append (coPrimeNum);
 
-        String filePath = sharesFilePath ();
         for (SecretShare share: shares)
         {
             String coShare = share.getNumber () + ":" + String.valueOf (share.getShare ());
             this.sharei[share.getNumber ()-1].setText (coShare);
 
-            ///
-            writingShares (filePath, coPrimeNum, share.getNumber (), coShare);
-            ///
-
             primeAndShares.append ("\n").append (coShare);
         }
         primeAndAllShares = String.valueOf (primeAndShares);
-        //        catch (FileNotFoundException e)
-//        {
-//            MessageDialog.showInformationMessage (parent,"The specified file is not found");
-//        } catch (UnsupportedEncodingException e)
-//        {
-//            MessageDialog.showInformationMessage (parent,"The Encoding is not supported");
-//        }
     }
 
-    private void writingShares (String filePath, String coPrimeNum, int shareNum, String coShare)
+    private void writingShares ()
     {
         try
         {
-            String fileName = filePath + "/Share#" + (shareNum) + ".txt";
-            PrintWriter writer = new PrintWriter(fileName, "UTF-8");
-            writer.println(coPrimeNum);
-            writer.println ();
-            writer.println(coShare);
-            writer.close();
+            String filePath = sharesFilePath ();
+            for (JPasswordField share: sharei)
+            {
+                String shareNumber = String.valueOf (share.getPassword ()).substring (0,
+                                                                                      String.valueOf (share.getPassword ()).indexOf (":"));
+                String fileName = filePath + "/Share#" + (shareNumber) + ".txt";
+                PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+                writer.println(primeNum.getPassword ());
+                writer.println ();
+                writer.println(share.getPassword ());
+                writer.close();
+            }
         } catch (FileNotFoundException e)
         {
             MessageDialog.showInformationMessage (parent, "The specified file is not found");
