@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
+import java.io.*;
 import java.math.BigInteger;
 
 import javax.swing.*;
@@ -36,11 +36,12 @@ public class CombineShares extends JDialog implements ActionListener
     private JPasswordField passwordField;
     private JPasswordField[] sharei;
     private JToggleButton[] showShareButton;
+    private JButton[] locateShareButton;
     private JPasswordField primeNum;
     private JToggleButton showPrimeButton;
     private JScrollPane sharesPanelJScrollPane;
+    private JButton locatePrimeButton;
 //    private JTextField filename;
-//    private JButton locateFileButton;
 
     String filePath;
     String passwordStr;
@@ -52,10 +53,14 @@ public class CombineShares extends JDialog implements ActionListener
     private char ORIGINAL_ECHO;
     private static final char NULL_ECHO = '\0';
 
+    private JPassFrame parent;
+
     public CombineShares (final JPassFrame parent, final String title)
     {
         super (parent, title, true);
         setDefaultCloseOperation (WindowConstants.DISPOSE_ON_CLOSE);
+
+        this.parent = parent;
 
         this.formData = null;
 
@@ -71,6 +76,12 @@ public class CombineShares extends JDialog implements ActionListener
         showPrimeButton.setMnemonic (KeyEvent.VK_S);
         showPrimeButton.addActionListener (this);
         this.fieldPanel.add (showPrimeButton);
+
+//        locatePrimeButton = new JButton ("Locate", MessageDialog.getIcon ("accept"));
+//        locatePrimeButton.setActionCommand ("locate_prime_button");
+//        locatePrimeButton.setMnemonic (KeyEvent.VK_S);
+//        locatePrimeButton.addActionListener (this);
+//        this.fieldPanel.add (locatePrimeButton);
 
         /*this.fieldPanel.add (new JLabel ("The .jpass file:"));
         this.filename = TextComponentFactory.newTextField ();
@@ -131,6 +142,31 @@ public class CombineShares extends JDialog implements ActionListener
         {
             submitShares ();
         }
+        if ("locate_prime_button".equals (command))
+        {
+            final File primeFile = FileHelper
+                    .showFileChooser (JPassFrame.getInstance (), "Open", "txt", "Share text file (*.txt)");
+            BufferedReader bufferedReader;
+            try
+            {
+                if (primeFile!=null)
+                {
+                    bufferedReader = new BufferedReader (new FileReader (primeFile));
+                    String line;
+                    while ((line = bufferedReader.readLine ()) != null)
+                    {
+                        if (line.matches ("^[0-9]{1,2}P:[0-9]+$"))
+                            primeNum.setText (line);
+                    }
+                }
+            } catch (FileNotFoundException fileNotFoundException)
+            {
+                MessageDialog.showWarningMessage (parent, "The file can't be found.");
+            } catch (IOException ioException)
+            {
+                ioException.printStackTrace ();
+            }
+        }
         if ((command).matches ("show_button[0-9]{1,2}"))
         {
             int shareNum = 0;
@@ -146,6 +182,44 @@ public class CombineShares extends JDialog implements ActionListener
             shareNum = Integer.parseInt (String.valueOf (sb));
             sharei[shareNum]
                     .setEchoChar (this.showShareButton[shareNum].isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
+        }
+
+        if ((command).matches ("locate_share_button[0-9]{1,2}"))
+        {
+            int shareNum = 0;
+            StringBuilder sb = new StringBuilder ();
+            for (int i = 0; i < command.length (); i++)
+            {
+                final char c = command.charAt (i);
+                if (c > 47 && c < 58)
+                {
+                    sb.append (c);
+                }
+            }
+            shareNum = Integer.parseInt (String.valueOf (sb));
+            final File shareFile = FileHelper
+                    .showFileChooser (JPassFrame.getInstance (), "Open", "txt", "Share text file (*.txt)");
+            BufferedReader bufferedReader;
+            try
+            {
+                if (shareFile!=null)
+                {
+                    bufferedReader = new BufferedReader (new FileReader (shareFile));
+                    String line;
+                    while ((line = bufferedReader.readLine ()) != null)
+                    {
+                        if (line.matches ("^[0-9]{1,2}:[0-9]+$"))
+                            sharei[shareNum].setText (line);
+                    }
+//                    sharei[shareNum].setEnabled (false);
+                }
+            } catch (FileNotFoundException fileNotFoundException)
+            {
+                MessageDialog.showWarningMessage (parent, "The file can't be found.");
+            } catch (IOException ioException)
+            {
+                ioException.printStackTrace ();
+            }
         }
         if ("show_button".equals (command))
         {
@@ -212,6 +286,7 @@ public class CombineShares extends JDialog implements ActionListener
                 JPanel sharesPanel = new JPanel ();
                 sharei = new JPasswordField[numOfShares];
                 showShareButton = new JToggleButton[numOfShares];
+                locateShareButton = new JButton[numOfShares];
                 for (int i = 0; i < numOfShares; i++)
                 {
                     sharesPanel.add (new JLabel ("Share" + (i + 1) + ":"));
@@ -225,6 +300,12 @@ public class CombineShares extends JDialog implements ActionListener
                     showShareButton[i].setMnemonic (KeyEvent.VK_S);
                     showShareButton[i].addActionListener (this);
                     sharesPanel.add (showShareButton[i]);
+
+                    locateShareButton[i] = new JButton ("Locate", MessageDialog.getIcon ("accept"));
+                    locateShareButton[i].setActionCommand ("locate_share_button" + i);
+                    locateShareButton[i].setMnemonic (KeyEvent.VK_S);
+                    locateShareButton[i].addActionListener (this);
+                    sharesPanel.add (locateShareButton[i]);
                 }
 
                 this.passwordPanel = new JPanel (new SpringLayout ());
@@ -237,7 +318,7 @@ public class CombineShares extends JDialog implements ActionListener
 
                 sharesPanel.setLayout (new SpringLayout ());
                 SpringUtilities.makeCompactGrid (sharesPanel,
-                                                 numOfShares, 3, //rows, columns
+                                                 numOfShares, 4, //rows, columns
                                                  5, 5, //initX, initY
                                                  5, 5);    //xPad, yPad
 
