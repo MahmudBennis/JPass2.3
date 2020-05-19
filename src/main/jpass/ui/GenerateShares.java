@@ -354,14 +354,18 @@ public class GenerateShares extends JDialog implements ActionListener
             String filePath = sharesFilePath ();
             for (JPasswordField share: sharei)
             {
-                String shareNumber = String.valueOf (share.getPassword ()).substring (0,
+                String strShareNum = String.valueOf (share.getPassword ()).substring (0,
                                                                                       String.valueOf (share.getPassword ()).indexOf (":"));
-                String fileName = filePath + "/Share#" + (shareNumber) + ".txt";
+                String fileName = filePath + "/Share#" + (strShareNum) + ".txt";
                 PrintWriter writer = new PrintWriter(fileName, "UTF-8");
                 writer.println(primeNum.getPassword ());
                 writer.println ();
                 writer.println(share.getPassword ());
                 writer.close();
+                int intShareNum = Integer.parseInt (strShareNum);
+                QRcode.generateQRcode (String.valueOf(sharei[intShareNum-1].getPassword()),
+                                       sharesFilePath ()+"/share#"+intShareNum+"QRcode.png",
+                                       "UTF-8");
             }
         } catch (FileNotFoundException e)
         {
