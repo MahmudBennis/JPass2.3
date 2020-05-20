@@ -362,6 +362,7 @@ public class GenerateShares extends JDialog implements ActionListener
                 writer.println ();
                 writer.println(share.getPassword ());
                 writer.close();
+
                 int intShareNum = Integer.parseInt (strShareNum);
                 QRcode.generateQRcode (String.valueOf(sharei[intShareNum-1].getPassword()),
                                        sharesFilePath ()+"/share#"+intShareNum+"QRcode.png",
