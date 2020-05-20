@@ -109,7 +109,7 @@ public final class FileHelper
     public static void exportFile (final JPassFrame parent) {
         MessageDialog.showWarningMessage (parent,
                                           "Please note that all data will be stored unencrypted.\nMake sure you keep the exported file in a secure location.");
-        File file = showFileChooser(parent, "Export", "xml", "XML Files (*.xml)");
+        File file = showFileChooser(parent, "Export", new String[]{"xml"}, "XML Files (*.xml)");
         if (file == null) {
             return;
         }
@@ -137,7 +137,7 @@ public final class FileHelper
      * @param parent parent component
      */
     public static void importFile (final JPassFrame parent) {
-        File file = showFileChooser(parent, "Import", "xml", "XML Files (*.xml)");
+        File file = showFileChooser(parent, "Import", new String[]{"xml"}, "XML Files (*.xml)");
         if (file == null) {
             return;
         }
@@ -213,7 +213,7 @@ public final class FileHelper
         //File dbFile;
         if (saveAs || parent.getModel().getFileName() == null)
         {
-            File file = showFileChooser(parent, "Save", "jpass", "JPass Data Files (*.jpass)");
+            File file = showFileChooser (parent, "Save", new String[]{"jpass"}, "JPass Data Files (*.jpass)");
             //username = MessageDialog.showUsernameDialog (parent, false);
             //dbFile = filePath ("resources/database/", username + ".jpass");
             if (file == null) {
@@ -279,7 +279,7 @@ public final class FileHelper
     public static void openFile (final JPassFrame parent) {
 //        final String username = MessageDialog.showUsernameDialog (parent, true);
 //        final File dbFile = filePath ("resources/database/", username + ".jpass");
-        final File file = showFileChooser(parent, "Open", "jpass", "JPass Data Files (*.jpass)");
+        final File file = showFileChooser(parent, "Open", new String[]{"jpass"}, "JPass Data Files (*.jpass)");
         if (file == null) {
             return;
         }
@@ -409,7 +409,7 @@ public final class FileHelper
      * @return a file object
      */
     public static File showFileChooser (final JPassFrame parent, final String taskName,
-                                        final String extension, final String description) {
+                                        final String[] extension, final String description) {
         File ret = null;
         File databseFile = new File ("./database/");
         if (!databseFile.exists ())
@@ -420,7 +420,14 @@ public final class FileHelper
         fc.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File f) {
-                return f.isDirectory() || f.getName().toLowerCase().endsWith("." + extension);
+                for (String ext : extension) {
+                    if (f.isDirectory() || f.getName().toLowerCase().endsWith("."+ext)) {
+                        return true;
+                    }
+                }
+
+                return false;
+//                return f.isDirectory() || f.getName().toLowerCase().endsWith("." + extension);
             }
 
             @Override

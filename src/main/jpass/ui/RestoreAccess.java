@@ -117,7 +117,7 @@ public class RestoreAccess extends JDialog implements ActionListener
         if ("Locate_dbFile".equals (command))
         {
             final File dbFile = FileHelper
-                    .showFileChooser (JPassFrame.getInstance (), "Open", "jpass", "JPass Data Files (*.jpass)");
+                    .showFileChooser (JPassFrame.getInstance (), "Open", new String[]{"jpass"}, "JPass Data Files (*.jpass)");
             String jpassFilePath = (dbFile == null ? null : dbFile.getPath ());
             String strPassFile = (jpassFilePath == null ? null : jpassFilePath.substring (0,
                                                                                           jpassFilePath.lastIndexOf (".")) + ".stPassword");

@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.math.BigInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.*;
 
@@ -37,7 +39,7 @@ public class CombineShares extends JDialog implements ActionListener
     private JPasswordField[] sharei;
     private JToggleButton[] showShareButton;
     private JButton[] locateShareButton;
-    private JPasswordField primeNum;
+    private JTextField primeNum;
     private JToggleButton showPrimeButton;
     private JScrollPane sharesPanelJScrollPane;
     private JButton locatePrimeButton;
@@ -67,21 +69,21 @@ public class CombineShares extends JDialog implements ActionListener
         this.fieldPanel = new JPanel ();
 
         fieldPanel.add (new JLabel ("Prime Number:"));
-        primeNum = TextComponentFactory.newPasswordField (true);
-        this.ORIGINAL_ECHO = primeNum.getEchoChar ();
+        primeNum = TextComponentFactory.newTextField ();
+//        this.ORIGINAL_ECHO = primeNum.getEchoChar ();
         this.fieldPanel.add (primeNum);
 
         showPrimeButton = new JToggleButton ("Show", MessageDialog.getIcon ("show"));
         showPrimeButton.setActionCommand ("show_prime_button");
         showPrimeButton.setMnemonic (KeyEvent.VK_S);
         showPrimeButton.addActionListener (this);
-        this.fieldPanel.add (showPrimeButton);
+//        this.fieldPanel.add (showPrimeButton);
 
-//        locatePrimeButton = new JButton ("Locate", MessageDialog.getIcon ("accept"));
-//        locatePrimeButton.setActionCommand ("locate_prime_button");
-//        locatePrimeButton.setMnemonic (KeyEvent.VK_S);
-//        locatePrimeButton.addActionListener (this);
-//        this.fieldPanel.add (locatePrimeButton);
+        locatePrimeButton = new JButton ("Locate", MessageDialog.getIcon ("accept"));
+        locatePrimeButton.setActionCommand ("locate_prime_button");
+        locatePrimeButton.setMnemonic (KeyEvent.VK_S);
+        locatePrimeButton.addActionListener (this);
+        this.fieldPanel.add (locatePrimeButton);
 
         /*this.fieldPanel.add (new JLabel ("The .jpass file:"));
         this.filename = TextComponentFactory.newTextField ();
@@ -136,7 +138,7 @@ public class CombineShares extends JDialog implements ActionListener
         }
         if ("show_prime_button".equals (command))
         {
-            this.primeNum.setEchoChar (this.showPrimeButton.isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
+//            this.primeNum.setEchoChar (this.showPrimeButton.isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
         }
         if ("Submit_Shares".equals (command))
         {
@@ -144,29 +146,14 @@ public class CombineShares extends JDialog implements ActionListener
         }
         if ("locate_prime_button".equals (command))
         {
-            final File primeFile = FileHelper
-                    .showFileChooser (JPassFrame.getInstance (), "Open", "txt", "Share text file (*.txt)");
-            BufferedReader bufferedReader;
-            try
-            {
-                if (primeFile!=null)
-                {
-                    bufferedReader = new BufferedReader (new FileReader (primeFile));
-                    String line;
-                    while ((line = bufferedReader.readLine ()) != null)
-                    {
-                        if (line.matches ("^[0-9]{1,2}P:[0-9]+$"))
-                            primeNum.setText (line);
-                    }
-                }
-            } catch (FileNotFoundException fileNotFoundException)
-            {
-                MessageDialog.showWarningMessage (parent, "The file can't be found.");
-            } catch (IOException ioException)
-            {
-                ioException.printStackTrace ();
-            }
+            locatePrimeFile();
         }
+
+        if ((command).matches ("locate_share_button[0-9]{1,2}"))
+        {
+            locateShareFile(command);
+        }
+
         if ((command).matches ("show_button[0-9]{1,2}"))
         {
             int shareNum = 0;
@@ -184,43 +171,6 @@ public class CombineShares extends JDialog implements ActionListener
                     .setEchoChar (this.showShareButton[shareNum].isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
         }
 
-        if ((command).matches ("locate_share_button[0-9]{1,2}"))
-        {
-            int shareNum = 0;
-            StringBuilder sb = new StringBuilder ();
-            for (int i = 0; i < command.length (); i++)
-            {
-                final char c = command.charAt (i);
-                if (c > 47 && c < 58)
-                {
-                    sb.append (c);
-                }
-            }
-            shareNum = Integer.parseInt (String.valueOf (sb));
-            final File shareFile = FileHelper
-                    .showFileChooser (JPassFrame.getInstance (), "Open", "txt", "Share text file (*.txt)");
-            BufferedReader bufferedReader;
-            try
-            {
-                if (shareFile!=null)
-                {
-                    bufferedReader = new BufferedReader (new FileReader (shareFile));
-                    String line;
-                    while ((line = bufferedReader.readLine ()) != null)
-                    {
-                        if (line.matches ("^[0-9]{1,2}:[0-9]+$"))
-                            sharei[shareNum].setText (line);
-                    }
-//                    sharei[shareNum].setEnabled (false);
-                }
-            } catch (FileNotFoundException fileNotFoundException)
-            {
-                MessageDialog.showWarningMessage (parent, "The file can't be found.");
-            } catch (IOException ioException)
-            {
-                ioException.printStackTrace ();
-            }
-        }
         if ("show_button".equals (command))
         {
             this.passwordField.setEchoChar (this.showPasswordButton.isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
@@ -234,7 +184,7 @@ public class CombineShares extends JDialog implements ActionListener
 //            final String username = MessageDialog.showUsernameDialog (JPassFrame.getInstance (), true);
 //            final File dbFile = (username == null ? null : FileHelper.filePath ("resources/database/", username + ".jpass"));
 //            final File passFile = (username == null ? null : FileHelper.filePath ("resources/database/", username + ".stPassword"));
-            final File dbFile = FileHelper.showFileChooser(JPassFrame.getInstance (), "Open", "jpass", "JPass Data Files (*.jpass)");
+            final File dbFile = FileHelper.showFileChooser(JPassFrame.getInstance (), "Open", new String[]{"jpass"}, "JPass Data Files (*.jpass)");
             String jpassFilePath = (dbFile == null ? null : dbFile.getPath ());
             String strPassFile = (jpassFilePath == null ? null : jpassFilePath.substring (0,
                                                                                     jpassFilePath.lastIndexOf (".")) + ".stPassword");
@@ -262,7 +212,7 @@ public class CombineShares extends JDialog implements ActionListener
         boolean disableSubmitButton = true;
         try
         {
-            String coPrimeNum = String.valueOf (primeNum.getPassword ()).trim ();
+            String coPrimeNum = String.valueOf (primeNum.getText ()).trim ();
             if (coPrimeNum.isEmpty ())
             {
                 MessageDialog.showWarningMessage (this, "Please fill the complete Prime Number field.");
@@ -452,6 +402,100 @@ public class CombineShares extends JDialog implements ActionListener
         }
     }
 
+    public void locateShareFile (String shareName)
+    {
+        int shareNum = 0;
+        StringBuilder sb = new StringBuilder ();
+        for (int i = 0; i < shareName.length (); i++)
+        {
+            final char c = shareName.charAt (i);
+            if (c > 47 && c < 58)
+            {
+                sb.append (c);
+            }
+        }
+        shareNum = Integer.parseInt (String.valueOf (sb));
+        final File shareFile = FileHelper
+                .showFileChooser (JPassFrame.getInstance (), "Open",
+                                  new String[]{"txt", "png"}, "Share file (*.txt) OR (*.png)");
+        BufferedReader bufferedReader;
+        try
+        {
+            if (shareFile!=null && shareFile.getName ().toLowerCase ().endsWith (".txt"))
+            {
+                bufferedReader = new BufferedReader (new FileReader (shareFile));
+                String line;
+                while ((line = bufferedReader.readLine ()) != null)
+                {
+                    if (line.matches ("^[0-9]{1,2}:[0-9]+$"))
+                        sharei[shareNum].setText (line);
+                }
+                if (String.valueOf (sharei[shareNum].getPassword ()).isEmpty ())
+                    MessageDialog.showWarningMessage (parent, "The Share can't be found");
+//                    sharei[shareNum].setEnabled (false);
+            }
+            if (shareFile!=null && shareFile.getName ().toLowerCase ().endsWith (".png"))
+            {
+                String share = QRcode.readQRcode (shareFile.getPath ());
+                Pattern pattern = Pattern.compile ("[0-9]{1,2}:[0-9]+$");
+                Matcher matcher = (share != null ? pattern.matcher (share) : null);
+                if (matcher != null && matcher.find())
+                {
+                    sharei[shareNum].setText (matcher.group ());
+                }
+                if (matcher != null && sharei[shareNum].getPassword () == null)
+                    MessageDialog.showWarningMessage (parent, "The Share can't be found");
+            }
+        } catch (FileNotFoundException fileNotFoundException)
+        {
+            MessageDialog.showWarningMessage (parent, "The file can't be found.");
+        } catch (IOException ioException)
+        {
+            ioException.printStackTrace ();
+        }
+    }
+
+    private void locatePrimeFile ()
+    {
+        final File primeFile = FileHelper
+                .showFileChooser (JPassFrame.getInstance (), "Open",
+                                  new String[]{"txt", "png"}, "Share file (*.txt) Or (*.png)");
+        BufferedReader bufferedReader;
+        try
+        {
+            if (primeFile!=null && primeFile.getName ().toLowerCase ().endsWith (".txt"))
+            {
+                bufferedReader = new BufferedReader (new FileReader (primeFile));
+                String line;
+                while ((line = bufferedReader.readLine ()) != null)
+                {
+                    if (line.matches ("^[0-9]{1,2}P:[0-9]+$"))
+                        primeNum.setText (line);
+                }
+                if (primeNum.getText ().isEmpty ())
+                    MessageDialog.showWarningMessage (parent, "The Prime number can't be found");
+            }
+            if (primeFile!=null && primeFile.getName ().toLowerCase ().endsWith (".png"))
+            {
+                String share = QRcode.readQRcode (primeFile.getPath ());
+                Pattern pattern = Pattern.compile ("^[0-9]{1,2}P:[0-9]+");
+                Matcher matcher = (share != null ? pattern.matcher (share) : null);
+                if (matcher != null && matcher.find())
+                {
+                    primeNum.setText (matcher.group ());
+                }
+                if (matcher != null && primeNum.getText () == null)
+                    MessageDialog.showWarningMessage (parent, "The Prime number can't be found");
+            }
+        } catch (FileNotFoundException fileNotFoundException)
+        {
+            MessageDialog.showWarningMessage (parent, "The file can't be found.");
+        } catch (IOException ioException)
+        {
+            ioException.printStackTrace ();
+        }
+    }
+
     private void combineShamirShares ()
     {
         int avaSharesNum = numOfShares;
@@ -463,7 +507,7 @@ public class CombineShares extends JDialog implements ActionListener
             int shareNum = Integer.parseInt (coShareStr.substring (0, coShareStr.indexOf (":")));
             sharesToViewSecret[i] = new SecretShare (shareNum, new BigInteger (shareStr));
         }
-        String coPrimeStr = String.valueOf (primeNum.getPassword ()).trim ();
+        String coPrimeStr = String.valueOf (primeNum.getText ()).trim ();
         String primeStr = coPrimeStr.substring (coPrimeStr.indexOf (":") + 1);
         //int primeNum = Integer.parseInt (coPrimeStr.substring (0,coPrimeStr.indexOf ("P:")));
         BigInteger prime = new BigInteger (primeStr);

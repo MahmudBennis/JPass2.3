@@ -44,7 +44,7 @@ public class QRcode
 //            System.out.println("QR Code image created successfully!");
 
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 400, 400);
+            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 700, 700);
 
             Path path = FileSystems.getDefault ().getPath (filePath);
             MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
@@ -54,7 +54,7 @@ public class QRcode
         }
     }
 
-    public static String readQRcode (String filePath, String charset)
+    public static String readQRcode (String filePath)
     {
         Result qrCodeResult = null;
         try {
@@ -67,8 +67,8 @@ public class QRcode
                     new BufferedImageLuminanceSource(ImageIO.read(new FileInputStream(filePath)))));
             qrCodeResult = new MultiFormatReader().decode(binaryBitmap);
         } catch (Exception e) {
-            MessageDialog.showWarningMessage (JPassFrame.getInstance (), "There was an Exception.");
+            MessageDialog.showWarningMessage (JPassFrame.getInstance (), "QR code can not be parsed.");
         }
-        return qrCodeResult.getText();
+        return (qrCodeResult != null ? qrCodeResult.getText() : null);
     }
 }
