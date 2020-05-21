@@ -207,9 +207,25 @@ public class GenerateShares extends JDialog implements ActionListener
             String totShares = totalShares.getText ().trim ();
             String nedShares = neededShares.getText ().trim ();
 
+            boolean lengthRule = pass.length() >= 8 && pass.length() <= 50;
+            boolean upperRule = !pass.equals(pass.toLowerCase());
+            boolean lowerRule = !pass.equals(pass.toUpperCase());
+            boolean numeralRule = pass.matches("(.*)[0-9](.*)");
+            boolean nonAlphaRule = pass.matches("(.*)[^A-Za-z0-9](.*)");
+
             if (pass.isEmpty ())
             {
                 MessageDialog.showWarningMessage(this, "Please fill the password field.");
+            }
+            else if (!lengthRule || !upperRule || !lowerRule || !numeralRule || !nonAlphaRule)
+            {
+                MessageDialog.showWarningMessage(parent, "The Master Password must be/contain: \n" +
+                                                         "- Between 8 and 50 characters long.\n" +
+                                                         "- At least one uppercase letter.\n" +
+                                                         "- At least one lowercase letter.\n" +
+                                                         "- At least one numeral number.\n" +
+                                                         "- At least one non alphanumeric character." +
+                                                         "\n\nPlease remember that you don't have to remember it.");
             }
             else if (totShares.isEmpty ())
             {
@@ -229,6 +245,12 @@ public class GenerateShares extends JDialog implements ActionListener
             {
                 MessageDialog.showWarningMessage(this, "The link is not valid. You can leave it empty if wouldn't " +
                                                        "like to keep a copy of your files somewhere in the cloud.");
+            }
+            else if (link.length ()>100)
+            {
+                MessageDialog.showWarningMessage (this,
+                                                  "Sorry, your Link length is \"" + link.length () + "\".\n" +
+                                                  " It shouldn't exceed 100 characters");
             }
             else
             {
