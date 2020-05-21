@@ -34,6 +34,7 @@ public class QRcode
 //            String qrCodeData = "www.chillyfacts.com";
 //            String filePath = "D:\\QRCODE\\chillyfacts.png";
 ////            String charset = "UTF-8"; // or "ISO-8859-1"
+
 //            Map < EncodeHintType, ErrorCorrectionLevel > hintMap = new HashMap < EncodeHintType, ErrorCorrectionLevel > ();
 //            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 //            BitMatrix matrix = new MultiFormatWriter().encode(
@@ -41,11 +42,9 @@ public class QRcode
 //                    BarcodeFormat.QR_CODE, 500, 500, hintMap);
 //            MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath
 //                                                                               .lastIndexOf('.') + 1), new File(filePath));
-//            System.out.println("QR Code image created successfully!");
-
+//
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 700, 700);
-
+            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 500, 500);
             Path path = FileSystems.getDefault ().getPath (filePath);
             MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
 
@@ -67,8 +66,21 @@ public class QRcode
                     new BufferedImageLuminanceSource(ImageIO.read(new FileInputStream(filePath)))));
             qrCodeResult = new MultiFormatReader().decode(binaryBitmap);
         } catch (Exception e) {
-            MessageDialog.showWarningMessage (JPassFrame.getInstance (), "QR code can not be parsed.");
+            MessageDialog.showWarningMessage (JPassFrame.getInstance (), "No QR Code found in the image.");
         }
         return (qrCodeResult != null ? qrCodeResult.getText() : null);
+    }
+
+    private boolean qrCodeValid (BinaryBitmap binaryBitmap)
+    {
+        Result qrCodeResult = null;
+        try
+        {
+            qrCodeResult = new MultiFormatReader ().decode (binaryBitmap);
+        } catch (NotFoundException e)
+        {
+            return false;
+        }
+        return qrCodeResult != null;
     }
 }
