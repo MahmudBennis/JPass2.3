@@ -146,8 +146,8 @@ public class CombineShares extends JDialog implements ActionListener
         }
         if ("locate_prime_button".equals (command))
         {
-            MessageDialog.showInformationMessage (parent, "Please select any Share file, and we will extract the " +
-                                                          "Prime number from it.");
+            /*MessageDialog.showInformationMessage (parent, "Please select any Share file, and we will extract the " +
+                                                          "Prime number from it.");*/
             locatePrimeFile();
         }
 
