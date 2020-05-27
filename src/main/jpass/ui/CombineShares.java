@@ -1,9 +1,7 @@
 package main.jpass.ui;
 
 import main.jpass.ui.helper.FileHelper;
-import main.jpass.util.CryptUtils;
 import main.jpass.util.SpringUtilities;
-import main.jpass.util.StringUtils;
 import main.jpass.xml.bind.Entry;
 import main.secretShare.SecretShare;
 import main.secretShare.Shamir;
@@ -14,6 +12,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,7 @@ public class CombineShares extends JDialog implements ActionListener
 
     String filePath;
     String passwordStr;
+    String autoFilledShare = null;
 
     private int numOfShares;
 
@@ -282,6 +284,9 @@ public class CombineShares extends JDialog implements ActionListener
                 getContentPane ().add (sharesPanelJScrollPane = new JScrollPane (sharesPanel), BorderLayout.CENTER);
                 getContentPane ().add (this.passwordPanel, BorderLayout.SOUTH);
                 revalidate ();
+
+                if (autoFilledShare != null && sharei != null)
+                    sharei[0].setText (autoFilledShare.trim ());
             }
         } catch (NumberFormatException | StringIndexOutOfBoundsException ex)
         {
@@ -303,6 +308,7 @@ public class CombineShares extends JDialog implements ActionListener
         {
             boolean sharesAreMissed = false;
             boolean notJustNum = false;
+            Set<String> s = new HashSet<String> ();
             for (JPasswordField share : sharei)
             {
                 String coShareStr = String.valueOf (share.getPassword ()).trim ();
@@ -317,6 +323,7 @@ public class CombineShares extends JDialog implements ActionListener
                     notJustNum = true;
                     break;
                 }
+                s.add (String.valueOf (share.getPassword ()));
             }
             if (sharesAreMissed)
             {
@@ -328,6 +335,11 @@ public class CombineShares extends JDialog implements ActionListener
                 MessageDialog.showWarningMessage (this, "Sorry, all shares should start with an integer " +
                                                         "followed by \":\" then followed by a stream of integers." +
                                                         " Ex, 7:68001482550476051309634236029");
+                disableSubmitButton = false;
+            }
+            else if (s.size() != sharei.length)
+            {
+                MessageDialog.showWarningMessage (this, "Sorry, all shares must be distinct.");
                 disableSubmitButton = false;
             }
             else
@@ -445,7 +457,7 @@ public class CombineShares extends JDialog implements ActionListener
                 {
                     sharei[shareNum].setText (matcher.group ());
                 }
-                if (matcher != null && sharei[shareNum].getPassword () == null)
+                if (matcher != null && String.valueOf (sharei[shareNum].getPassword ()).isEmpty ())
                     MessageDialog.showWarningMessage (parent, "The Share can't be found");
             }
         } catch (FileNotFoundException fileNotFoundException)
@@ -473,6 +485,8 @@ public class CombineShares extends JDialog implements ActionListener
                 {
                     if (line.matches ("^[0-9]{1,2}P:[0-9]+$"))
                         primeNum.setText (line);
+                    if (line.matches ("^[0-9]{1,2}:[0-9]+$"))
+                        autoFilledShare = line;
                 }
                 if (primeNum.getText ().isEmpty ())
                     MessageDialog.showWarningMessage (parent, "The Prime number can't be found");
@@ -480,15 +494,19 @@ public class CombineShares extends JDialog implements ActionListener
             if (primeFile!=null && primeFile.getName ().toLowerCase ().endsWith (".png"))
             {
                 String share = QRcode.readQRcode (primeFile.getPath ());
-                Pattern pattern = Pattern.compile ("^[0-9]{1,2}P:[0-9]+");
-                Matcher matcher = (share != null ? pattern.matcher (share) : null);
-                if (matcher != null && matcher.find())
-                {
-                    primeNum.setText (matcher.group ());
-                }
-                if (matcher != null && primeNum.getText () == null)
+                Pattern primePattern = Pattern.compile ("^[0-9]{1,2}P:[0-9]+");
+                Pattern sharePattern = Pattern.compile ("\n[0-9]{1,2}:[0-9]+$");
+                Matcher primeMatcher = (share != null ? primePattern.matcher (share) : null);
+                Matcher shareMatcher = (share != null ? sharePattern.matcher (share) : null);
+                if (primeMatcher != null && primeMatcher.find())
+                    primeNum.setText (primeMatcher.group ());
+                if (shareMatcher != null && shareMatcher.find ())
+                    autoFilledShare = shareMatcher.group ();
+                if (primeMatcher != null && primeNum.getText ().isEmpty ())
                     MessageDialog.showWarningMessage (parent, "The Prime number can't be found");
             }
+            if (autoFilledShare != null && sharei != null)
+                sharei[0].setText (autoFilledShare);
         } catch (FileNotFoundException fileNotFoundException)
         {
             MessageDialog.showWarningMessage (parent, "The file can't be found.");

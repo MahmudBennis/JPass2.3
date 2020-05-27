@@ -8,6 +8,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -35,18 +36,33 @@ public class QRcode
 //            String filePath = "D:\\QRCODE\\chillyfacts.png";
 ////            String charset = "UTF-8"; // or "ISO-8859-1"
 
-//            Map < EncodeHintType, ErrorCorrectionLevel > hintMap = new HashMap < EncodeHintType, ErrorCorrectionLevel > ();
-//            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-//            BitMatrix matrix = new MultiFormatWriter().encode(
-//                    new String(qrCodeData.getBytes(charset), charset),
-//                    BarcodeFormat.QR_CODE, 500, 500, hintMap);
-//            MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath
-//                                                                               .lastIndexOf('.') + 1), new File(filePath));
+            Map < EncodeHintType, ErrorCorrectionLevel > hintMap = new HashMap < EncodeHintType, ErrorCorrectionLevel > ();
+            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+            BitMatrix matrix = new MultiFormatWriter().encode(
+                    new String(qrCodeData.getBytes(charset), charset),
+                    BarcodeFormat.QR_CODE, 500, 500, hintMap);
+            MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath
+                                                                               .lastIndexOf('.') + 1), new File(filePath));
 //
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 500, 500);
-            Path path = FileSystems.getDefault ().getPath (filePath);
-            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+//            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+//            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 470, 470);
+//            Path path = FileSystems.getDefault ().getPath (filePath);
+//            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+            int dec = 10;
+            while (!qrCodeValid (filePath) || Objects.requireNonNull (readQRcode (filePath)).length () < 20)
+            {
+                matrix = new MultiFormatWriter().encode(
+                        new String(qrCodeData.getBytes(charset), charset),
+                        BarcodeFormat.QR_CODE, 500-dec, 500-dec, hintMap);
+                MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath
+                                                                                   .lastIndexOf('.') + 1), new File(filePath));
+//                System.out.println (filePath + " >> incorrect " + dec);
+//                bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 470-dec, 470-dec);
+//                path = FileSystems.getDefault ().getPath (filePath);
+//                MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+                dec+=10;
+            }
+
 
         } catch (Exception e) {
             System.err.println(e);
@@ -71,15 +87,20 @@ public class QRcode
         return (qrCodeResult != null ? qrCodeResult.getText() : null);
     }
 
-    private boolean qrCodeValid (BinaryBitmap binaryBitmap)
+    public static boolean qrCodeValid (String filePath)
     {
         Result qrCodeResult = null;
         try
         {
+            BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(
+                    new BufferedImageLuminanceSource(ImageIO.read(new FileInputStream(filePath)))));
             qrCodeResult = new MultiFormatReader ().decode (binaryBitmap);
-        } catch (NotFoundException e)
+        } catch (NotFoundException | FileNotFoundException e)
         {
             return false;
+        } catch (IOException e)
+        {
+            e.printStackTrace ();
         }
         return qrCodeResult != null;
     }
