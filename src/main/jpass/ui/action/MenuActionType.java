@@ -30,6 +30,7 @@ package main.jpass.ui.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -151,20 +152,32 @@ public enum MenuActionType {
                 JPassFrame parent = JPassFrame.getInstance();
 //                String username = parent.getModel ().getUsername ();
                 String jpassFilePath = JPassFrame.getInstance ().getModel ().getFileName ();
+                String fileName = jpassFilePath.substring (0,jpassFilePath.lastIndexOf ("."));
+                String strStPassFile = fileName + ".stPassword";
+                final File stPassFile = new File (strStPassFile);
                 byte[] stPasswordHash = parent.getModel ().getPassword ();
                 byte[] ndPasswordHash = openPasswordDoc (stPasswordHash, jpassFilePath,".ndPassword");
-                stPasswordHash = MessageDialog.showPasswordDialog(parent, true);
-                if (stPasswordHash == null) {
-                    MessageDialog.showInformationMessage(parent, "Password has not been modified.");
-                } else {
-                    parent.getModel().setPassword(stPasswordHash);
-                    parent.getModel().setModified(true);
-                    parent.refreshFrameTitle();
-                    savePassword (ndPasswordHash, stPasswordHash,".stPassword", false);
-                    savePassword (stPasswordHash, ndPasswordHash,".ndPassword", false);
-                    saveFile (parent, false,result -> {});
-                    MessageDialog.showInformationMessage(parent,
-                                                         "Password has been successfully modified.\n\nSave the file now in order to\nget the new password applied.");
+                if (ndPasswordHash == null && stPassFile.exists ())
+                    MessageDialog.showWarningMessage (parent,
+                                                      "Sorry, we couldn't locate the \".ndPassword\" file. Please " +
+                                                      "place it at the same directory as the \".jpass\" and \"" +
+                                                      ".stPassword\" files.");
+                else
+                {
+                    stPasswordHash = MessageDialog.showPasswordDialog(parent, true);
+                    if (stPasswordHash == null) {
+                        MessageDialog.showInformationMessage(parent, "Password has not been modified.");
+                    }
+                    else {
+                        parent.getModel().setPassword(stPasswordHash);
+                        parent.getModel().setModified(true);
+                        parent.refreshFrameTitle();
+                        savePassword (ndPasswordHash, stPasswordHash,".stPassword", false);
+                        savePassword (stPasswordHash, ndPasswordHash,".ndPassword", false);
+                        saveFile (parent, false,result -> {});
+                        MessageDialog.showInformationMessage(parent,
+                                                             "Password has been successfully modified.\n\nSave the file now in order to\nget the new password applied.");
+                    }
                 }
             }
             catch (Exception e)
