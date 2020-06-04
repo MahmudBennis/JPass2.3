@@ -189,7 +189,7 @@ public final class EntryHelper
                                                           "Note: You don't have to remember your second Master " +
                                                           "Password.");
 
-            GenerateShares gs = new GenerateShares (JPassFrame.getInstance (), "Generate Password Shares");
+            GenerateShares gs = new GenerateShares (JPassFrame.getInstance (), "Generate Secret Shares");
 
             if (gs.getFormData () != null)
             {
@@ -208,7 +208,7 @@ public final class EntryHelper
                                                       "Note: For the Prime number field, you can select " +
                                                       "any Share file (.txt or .png) and the Prime number will be " +
                                                       "extracted for it.");
-        CombineShares cs = new CombineShares (JPassFrame.getInstance (), "Combine Password Shares");
+        CombineShares cs = new CombineShares (JPassFrame.getInstance (), "Reveal Secret");
 
         if (cs.getFormData () != null)
         {

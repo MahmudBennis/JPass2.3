@@ -7,7 +7,7 @@ import java.util.Random;
 
 public final class Shamir
 {
-    public static SecretShare[] split (final BigInteger secret, int neededNum, int totalNum, BigInteger prime, Random random)
+    public static SecretShare[] generateShares (final BigInteger secret, int neededNum, int totalNum, BigInteger prime, Random random)
     {
         // secret > the Secret.
         // neededNum > the required Shares.
@@ -46,7 +46,7 @@ public final class Shamir
         return shares;
     }
 
-    public static String combine (final SecretShare[] shares, final BigInteger prime)
+    public static String combineShares (final SecretShare[] shares, final BigInteger prime)
     {
         BigInteger accum = BigInteger.ZERO;
 
@@ -60,13 +60,13 @@ public final class Shamir
                 if(formula == count)
                     continue; // If not the same value
 
-                int startposition = shares[formula].getNumber();
-                int nextposition = shares[count].getNumber();
+                int startposition = shares[formula].getShareNumber ();
+                int nextposition = shares[count].getShareNumber ();
 
                 numerator = numerator.multiply(BigInteger.valueOf(nextposition).negate()).mod(prime); // (numerator * -nextposition) % prime;
                 denominator = denominator.multiply(BigInteger.valueOf(startposition - nextposition)).mod(prime); // (denominator * (startposition - nextposition)) % prime;
             }
-            BigInteger value = shares[formula].getShare();
+            BigInteger value = shares[formula].getShareValue ();
             BigInteger tmp = value.multiply(numerator) . multiply(modInverse(denominator, prime));
             accum = prime.add(accum).add(tmp) . mod(prime); //  (prime + accum + (value * numerator * modInverse(denominator))) % prime;
         }
@@ -112,7 +112,7 @@ public final class Shamir
         final int CERTAINTY = 256;
         final SecureRandom random = new SecureRandom();
         final BigInteger prime = new BigInteger(bigIntegerPassword.bitLength() + 1, CERTAINTY, random);
-        final SecretShare[] shares = Shamir.split (bigIntegerPassword, nedNuShares, totNuShares, prime, random);
+        final SecretShare[] shares = Shamir.generateShares (bigIntegerPassword, nedNuShares, totNuShares, prime, random);
 
         String coPrimeNum = nedNuShares + "P:" + prime;
 
@@ -121,8 +121,8 @@ public final class Shamir
         String[] sharei = new String [totNuShares];
         for (SecretShare share: shares)
         {
-            String coShare = share.getNumber () + ":" + share.getShare ();
-            sharei[share.getNumber ()-1] = coShare;
+            String coShare = share.getShareNumber () + ":" + share.getShareValue ();
+            sharei[share.getShareNumber () - 1] = coShare;
 
             primeAndShares.append ("\n").append (coShare);
         }
@@ -149,7 +149,7 @@ public final class Shamir
             String primeStr = coPrimeStr.substring (coPrimeStr.indexOf (":")+1);
             //int primeNum = Integer.parseInt (coPrimeStr.substring (0,coPrimeStr.indexOf ("P:")));
             BigInteger bigIntegerPrime = new BigInteger(primeStr);
-            String result = Shamir.combine (sharesToViewSecret, bigIntegerPrime);
+            String result = Shamir.combineShares (sharesToViewSecret, bigIntegerPrime);
             return result;
         }
         return ("Sorry, you have to provide " + avaSharesNum + " shares in order to reconstruct your " +

@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -519,19 +518,19 @@ public class CombineShares extends JDialog implements ActionListener
     private void combineShamirShares ()
     {
         int avaSharesNum = numOfShares;
-        SecretShare[] sharesToViewSecret = new SecretShare[avaSharesNum];
+        SecretShare[] sharesToRevealSecret = new SecretShare[avaSharesNum];
         for (int i = 0; i < avaSharesNum; i++)
         {
             String coShareStr = String.valueOf (sharei[i].getPassword ()).trim ();
             String shareStr = coShareStr.substring (coShareStr.indexOf (":") + 1);
             int shareNum = Integer.parseInt (coShareStr.substring (0, coShareStr.indexOf (":")));
-            sharesToViewSecret[i] = new SecretShare (shareNum, new BigInteger (shareStr));
+            sharesToRevealSecret[i] = new SecretShare (shareNum, new BigInteger (shareStr));
         }
         String coPrimeStr = String.valueOf (primeNum.getText ()).trim ();
         String primeStr = coPrimeStr.substring (coPrimeStr.indexOf (":") + 1);
         //int primeNum = Integer.parseInt (coPrimeStr.substring (0,coPrimeStr.indexOf ("P:")));
         BigInteger prime = new BigInteger (primeStr);
-        String result = Shamir.combine (sharesToViewSecret, prime);
+        String result = Shamir.combineShares (sharesToRevealSecret, prime);
         passwordStr = result;
     }
 }

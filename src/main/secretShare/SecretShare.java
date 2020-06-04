@@ -4,28 +4,28 @@ import java.math.BigInteger;
 
 public class SecretShare
 {
-    public SecretShare(final int number, final BigInteger share)
+    private final int shareNumber;
+    private final BigInteger shareValue;
+
+    public SecretShare (final int shareNumber, final BigInteger shareValue)
     {
-        this.number = number;
-        this.share = share;
+        this.shareNumber = shareNumber;
+        this.shareValue = shareValue;
     }
 
-    public int getNumber()
+    public int getShareNumber ()
     {
-        return number;
+        return shareNumber;
     }
 
-    public BigInteger getShare()
+    public BigInteger getShareValue ()
     {
-        return share;
+        return shareValue;
     }
 
     @Override
     public String toString()
     {
-        return "Share"+ number + ": " + share;
+        return "Share" + shareNumber + ": " + shareValue;
     }
-
-    private final int number;
-    private final BigInteger share;
 }

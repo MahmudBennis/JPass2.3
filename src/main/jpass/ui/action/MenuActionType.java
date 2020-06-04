@@ -161,7 +161,12 @@ public enum MenuActionType {
                     MessageDialog.showWarningMessage (parent,
                                                       "Sorry, we couldn't locate the \".ndPassword\" file. Please " +
                                                       "place it at the same directory as the \".jpass\" and \"" +
-                                                      ".stPassword\" files.");
+                                                      ".stPassword\" files.\n\nNote: If you still want to change your" +
+                                                      " Master Password, you have to either:" +
+                                                      " Generate a new shares and redistribute them again \nOr " +
+                                                      "Deleting the \".stPassword\" file, but remember by deleting it" +
+                                                      " the access to the database encrypted file can not be " +
+                                                      "recovered from shares anymore.");
                 else
                 {
                     stPasswordHash = MessageDialog.showPasswordDialog(parent, true);

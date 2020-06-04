@@ -347,8 +347,7 @@ public final class FileHelper
                 } catch (Throwable e) {
                     //java.util.zip.ZipException: Not in GZIP format >> means either the chosen file or the inserted
                     // password is wrong.
-                    throw new Exception(e.getMessage() + "\nYou probably have either chosen the wrong file or " +
-                                        "inserted a wrong master " + "password");
+                    throw new Exception(e.getMessage() + "\nYou must inserted a wrong Master Password.");
                 }
                 return null;
             }

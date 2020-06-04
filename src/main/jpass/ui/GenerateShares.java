@@ -345,12 +345,12 @@ public class GenerateShares extends JDialog implements ActionListener
                 " and \".ndPassword\" files, (they should be in a folder named \"database\", on the same directory " +
                 "as this JPass client). After having the files come back to this JPass client and press on Restore " +
                 "access button and use the given second Master Password to restore access to the database.";
-        final BigInteger bigIntegerPassword = new BigInteger(linkToFiles.isEmpty () ? secretWithoutLink.getBytes () :
+        final BigInteger bigIntegerSecret = new BigInteger(linkToFiles.isEmpty () ? secretWithoutLink.getBytes () :
                                                              secretWithLink.getBytes ());
         final int CERTAINTY = 256;
         final SecureRandom random = new SecureRandom();
-        final BigInteger prime = new BigInteger(bigIntegerPassword.bitLength() + 1, CERTAINTY, random);
-        final SecretShare[] shares = Shamir.split (bigIntegerPassword, nedNuShares, totNuShares, prime, random);
+        final BigInteger prime = new BigInteger(bigIntegerSecret.bitLength() + 1, CERTAINTY, random);
+        final SecretShare[] shares = Shamir.generateShares (bigIntegerSecret, nedNuShares, totNuShares, prime, random);
 
         String coPrimeNum = nedNuShares + "P:" + String.valueOf (prime);
         this.primeNum.setText (coPrimeNum);
@@ -361,8 +361,8 @@ public class GenerateShares extends JDialog implements ActionListener
 
         for (SecretShare share: shares)
         {
-            String coShare = share.getNumber () + ":" + String.valueOf (share.getShare ());
-            this.sharei[share.getNumber ()-1].setText (coShare);
+            String coShare = share.getShareNumber () + ":" + String.valueOf (share.getShareValue ());
+            this.sharei[share.getShareNumber () - 1].setText (coShare);
 
             primeAndShares.append ("\n").append (coShare);
         }
