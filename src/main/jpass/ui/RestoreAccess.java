@@ -53,7 +53,7 @@ public class RestoreAccess extends JDialog implements ActionListener
         this.showStPasswordButton.addActionListener (this);
         this.fieldPanel.add (this.showStPasswordButton);
 
-        this.fieldPanel.add (new JLabel ("The .jpass file:"));
+        this.fieldPanel.add (new JLabel ("Database File:"));
         this.dbFilename = TextComponentFactory.newTextField ();
         this.dbFilename.setEditable (false);
         this.fieldPanel.add (this.dbFilename);
@@ -131,9 +131,9 @@ public class RestoreAccess extends JDialog implements ActionListener
                 }
                 else
                 {
-                    MessageDialog.showWarningMessage (JPassFrame.getInstance (), "Couldn't find the .stPassword file, " +
-                                                                                 "Please place it in the same folder " +
-                                                                                 "as the .jpass file");
+                    MessageDialog.showErrorMessage (JPassFrame.getInstance (), "Couldn't find the \".stPassword\"" +
+                                                                               "file, Please place it in the same " +
+                                                                               "folder as the \".jpass\" file");
                 }
             }
         }
@@ -149,14 +149,15 @@ public class RestoreAccess extends JDialog implements ActionListener
         {
             String secMasterPassword = String.valueOf (passwordField.getPassword ());
             if (secMasterPassword.isEmpty ())
-            {
-                MessageDialog.showWarningMessage(this, "Please fill the password field.");
-            }
+                MessageDialog.showWarningMessage(this, "Please fill the \"Master Password\" field.");
+            else if (dbFilename.getText ().isEmpty ())
+                MessageDialog.showWarningMessage(this, "Please fill the \"Database File\" field.");
             else
             {
                 byte[] ndPasswordHash = CryptUtils.getPKCS5Sha256Hash (secMasterPassword.toCharArray ());
                 byte[] stPasswordHash = FileHelper.openPasswordDoc (ndPasswordHash, filePath, ".stPassword");
                 FileHelper.doOpenFile (filePath , JPassFrame.getInstance (), true, stPasswordHash);
+                dispose();
             }
         }
         catch (Exception e)
@@ -165,6 +166,5 @@ public class RestoreAccess extends JDialog implements ActionListener
                                             "Cannot generate password hash:\n" + StringUtils
                                                     .stripString (e.getMessage ()) + "\n\nOpening and saving files are not possible!");
         }
-        dispose();
     }
 }

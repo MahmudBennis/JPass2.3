@@ -204,7 +204,7 @@ public final class EntryHelper
     public static void combineShares (JPassFrame parent)
     {
         MessageDialog.showInformationMessage (parent, "You can type-in, copy&paste or locate the share file " +
-                                                      "(weather text file or QR code image file).\n" +
+                                                      "(whether text file or QR code image file).\n" +
                                                       "Note: For the Prime number field, you can select " +
                                                       "any Share file (.txt or .png) and the Prime number will be " +
                                                       "extracted for it.");
@@ -221,7 +221,7 @@ public final class EntryHelper
 
     public static void restoreAccess (JPassFrame parent)
     {
-        RestoreAccess ra = new RestoreAccess (JPassFrame.getInstance (), "Restore Account Access");
+        RestoreAccess ra = new RestoreAccess (JPassFrame.getInstance (), "Restore Access");
 
         if (ra.getFormData () != null)
         {
