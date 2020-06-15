@@ -158,6 +158,7 @@ public final class GeneratePasswordDialog extends JDialog implements ActionListe
         }
         this.customSymbolsCheck = new JCheckBox("Custom symbols");
         this.customSymbolsCheck.setActionCommand("custom_symbols_check");
+        this.customSymbolsCheck.setSelected (true);
         this.customSymbolsCheck.addActionListener(this);
         this.charactersPanel.add(this.customSymbolsCheck);
         this.customSymbolsField = TextComponentFactory.newTextField(SYMBOLS);

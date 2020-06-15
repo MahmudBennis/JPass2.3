@@ -31,10 +31,11 @@ public class GenerateShares extends JDialog implements ActionListener
     private final JTextField filesLink;
     private final JTextField totalShares;
     private final JTextField neededShares;
-    private final JButton generateButton;
+    private final JButton generatePasswordButton;
     private  JButton[] copyShareButton;
     private JButton copyAllButton;
     private JButton exportButton;
+    private JButton generateSharesButton;
     private JToggleButton[] showShareButton;
     private JToggleButton showPasswordButton;
     private JPasswordField[] sharei;
@@ -71,6 +72,7 @@ public class GenerateShares extends JDialog implements ActionListener
 
         this.fieldPanel.add(new JLabel("Second Master Password:"));
         this.passwordField = TextComponentFactory.newPasswordField(true);
+        this.passwordField.setEditable (false);
         this.ORIGINAL_ECHO = this.passwordField.getEchoChar();
         this.fieldPanel.add(this.passwordField);
 
@@ -94,18 +96,24 @@ public class GenerateShares extends JDialog implements ActionListener
         this.showPasswordButton.addActionListener (this);
         this.buttonsPanel.add (this.showPasswordButton);
 
-        this.generateButton = new JButton("Generate", MessageDialog.getIcon("generate"));
-        this.generateButton.setActionCommand("generate_button");
-        this.generateButton.setMnemonic (KeyEvent.VK_G);
-        this.generateButton.addActionListener(this);
-        this.buttonsPanel.add (this.generateButton);
+        this.generatePasswordButton = new JButton("Generate", MessageDialog.getIcon ("generate"));
+        this.generatePasswordButton.setActionCommand ("generate_Password_button");
+        this.generatePasswordButton.setMnemonic (KeyEvent.VK_G);
+        this.generatePasswordButton.addActionListener (this);
+        this.buttonsPanel.add (this.generatePasswordButton);
 
-        copyAllButton = new JButton("Copy All", MessageDialog.getIcon("keyring"));
-        copyAllButton.setActionCommand("copy_all_button");
-        copyAllButton.setMnemonic(KeyEvent.VK_C);
-        copyAllButton.addActionListener(this);
-        copyAllButton.setEnabled (false);
-        this.buttonsPanel.add (this.copyAllButton);
+//        copyAllButton = new JButton("Copy All", MessageDialog.getIcon("keyring"));
+//        copyAllButton.setActionCommand("copy_all_button");
+//        copyAllButton.setMnemonic(KeyEvent.VK_C);
+//        copyAllButton.addActionListener(this);
+//        copyAllButton.setEnabled (false);
+//        this.buttonsPanel.add (this.copyAllButton);
+
+        generateSharesButton = new JButton("Submit", MessageDialog.getIcon("accept"));
+        generateSharesButton.setActionCommand("generate_shares_button");
+        generateSharesButton.setMnemonic(KeyEvent.VK_C);
+        generateSharesButton.addActionListener(this);
+        this.buttonsPanel.add (this.generateSharesButton);
 
         exportButton = new JButton("Export", MessageDialog.getIcon("export"));
         exportButton.setActionCommand("export_button");
@@ -140,9 +148,18 @@ public class GenerateShares extends JDialog implements ActionListener
     public void actionPerformed (ActionEvent e)
     {
         String command = e.getActionCommand ();
-        if ("generate_button".equals (command))
+        if ("generate_shares_button".equals (command))
         {
             generateShares ();
+        }
+        if ("generate_Password_button".equals (command))
+        {
+            GeneratePasswordDialog gpd = new GeneratePasswordDialog (this);
+            String generatedPassword = gpd.getGeneratedPassword ();
+            if (generatedPassword != null && !generatedPassword.isEmpty ())
+            {
+                this.passwordField.setText (generatedPassword);
+            }
         }
         if ("show_button".equals (command))
         {
@@ -254,8 +271,9 @@ public class GenerateShares extends JDialog implements ActionListener
             }
             else
             {
-                this.generateButton.setEnabled (false);
-                copyAllButton.setEnabled (true);
+                this.generatePasswordButton.setEnabled (false);
+                this.generateSharesButton.setEnabled (false);
+//                copyAllButton.setEnabled (true);
                 exportButton.setEnabled (true);
 
                 secMasterPassword = pass;
