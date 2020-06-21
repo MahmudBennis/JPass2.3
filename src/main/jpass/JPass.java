@@ -57,23 +57,14 @@ public class JPass {
         try {
             FlatLaf lookAndFeel;
             if (Configuration.getInstance().is("ui.theme.dark.mode.enabled", false)) {
-                //FlatDarkLaf.install(); // it returns a Boolean !! What is it for??
                 lookAndFeel = new FlatDarkLaf();
             } else {
-                //FlatLightLaf.install(); // it returns a Boolean !! What is it for??
                 lookAndFeel = new FlatLightLaf();
             }
             UIManager.setLookAndFeel(lookAndFeel); // Just changes the look of the window, I can select another one.
         } catch (Exception e) {
             LOG.log(Level.CONFIG, "Could not set look and feel for the application", e);
         }
-        // Using Lambda function ?? Why he used Lambda??.
-        // the ? mark is known as the wildcard in generic programming . It represents an unknown type.
         SwingUtilities.invokeLater(() -> JPassFrame.getInstance((args.length > 0) ? args[0] : null));
-        // can be replaced with this one. So What is the need for Lambda function??
-        //SwingUtilities.invokeLater (JPassFrame::getInstance);
-        // Or even simply like this. Why not using this??
-        // What is the usee for the file name argument??
-        //JPassFrame.getInstance((args.length > 0) ? args[0] : null);
     }
 }

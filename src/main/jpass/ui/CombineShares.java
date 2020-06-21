@@ -21,21 +21,20 @@ import javax.swing.*;
 
 import static main.jpass.ui.helper.EntryHelper.copyEntryField;
 
+/**
+ * Combining Shares class for combining shares in order to reveal the Secret.
+ *
+ * @author Mahmud Ibr Bennis.
+ *
+ */
 public class CombineShares extends JDialog implements ActionListener
 {
     private static final long serialVersionUID = -8551022862532925065L;
 
     private final JPanel fieldPanel;
     private JPanel passwordPanel;
-
-//    private final JPasswordField passwordField;
-//    private final JTextField totalShares;
-//    private final JTextField neededShares;
     private final JButton submitButton;
     private JButton submitSharesButton;
-    private JButton copyButton;
-    private JToggleButton showPasswordButton;
-    private JPasswordField passwordField;
     private JPasswordField[] sharei;
     private JToggleButton[] showShareButton;
     private JButton[] locateShareButton;
@@ -43,9 +42,7 @@ public class CombineShares extends JDialog implements ActionListener
     private JToggleButton showPrimeButton;
     private JScrollPane sharesPanelJScrollPane;
     private JButton locatePrimeButton;
-//    private JTextField filename;
 
-    String filePath;
     String passwordStr;
     String autoFilledShare = null;
 
@@ -56,8 +53,13 @@ public class CombineShares extends JDialog implements ActionListener
     private char ORIGINAL_ECHO;
     private static final char NULL_ECHO = '\0';
 
-    private JPassFrame parent;
+    private final JPassFrame parent;
 
+    /**
+     * The class constructor, which builds the Reveal Secret window.
+     * @param parent - The parent frame.
+     * @param title - The Window title.
+     */
     public CombineShares (final JPassFrame parent, final String title)
     {
         super (parent, title, true);
@@ -71,31 +73,13 @@ public class CombineShares extends JDialog implements ActionListener
 
         fieldPanel.add (new JLabel ("Prime Number:"));
         primeNum = TextComponentFactory.newTextField ();
-//        this.ORIGINAL_ECHO = primeNum.getEchoChar ();
         this.fieldPanel.add (primeNum);
-
-        showPrimeButton = new JToggleButton ("Show", MessageDialog.getIcon ("show"));
-        showPrimeButton.setActionCommand ("show_prime_button");
-        showPrimeButton.setMnemonic (KeyEvent.VK_S);
-        showPrimeButton.addActionListener (this);
-//        this.fieldPanel.add (showPrimeButton);
 
         locatePrimeButton = new JButton ("Locate", MessageDialog.getIcon ("accept"));
         locatePrimeButton.setActionCommand ("locate_prime_button");
         locatePrimeButton.setMnemonic (KeyEvent.VK_S);
         locatePrimeButton.addActionListener (this);
         this.fieldPanel.add (locatePrimeButton);
-
-        /*this.fieldPanel.add (new JLabel ("The .jpass file:"));
-        this.filename = TextComponentFactory.newTextField ();
-        this.filename.setEditable (false);
-        this.fieldPanel.add (this.filename);
-
-        this.locateFileButton = new JButton ("Locate file", MessageDialog.getIcon ("accept"));
-        this.locateFileButton.setActionCommand ("Locate_File");
-        this.locateFileButton.setMnemonic (KeyEvent.VK_G);
-        this.locateFileButton.addActionListener (this);
-        this.fieldPanel.add (this.locateFileButton);*/
 
         this.fieldPanel.add (new JLabel (""));
         this.submitButton = new JButton ("Submit", MessageDialog.getIcon ("accept"));
@@ -119,44 +103,18 @@ public class CombineShares extends JDialog implements ActionListener
         setVisible (true);
     }
 
-    private void setFormData (Entry formData)
-    {
-        this.formData = formData;
-    }
-
-    public Entry getFormData ()
-    {
-        return this.formData;
-    }
-
     @Override
     public void actionPerformed (ActionEvent e)
     {
         String command = e.getActionCommand ();
-        if ("Submit_coPrime_Num".equals (command))
-        {
-            insertShares ();
-        }
-        if ("show_prime_button".equals (command))
-        {
-//            this.primeNum.setEchoChar (this.showPrimeButton.isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
-        }
-        if ("Submit_Shares".equals (command))
-        {
-            submitShares ();
-        }
         if ("locate_prime_button".equals (command))
         {
-            /*MessageDialog.showInformationMessage (parent, "Please select any Share file, and we will extract the " +
-                                                          "Prime number from it.");*/
             locatePrimeFile();
         }
-
-        if ((command).matches ("locate_share_button[0-9]{1,2}"))
+        if ("Submit_coPrime_Num".equals (command))
         {
-            locateShareFile(command);
+            submitPrime ();
         }
-
         if ((command).matches ("show_button[0-9]{1,2}"))
         {
             int shareNum = 0;
@@ -173,44 +131,20 @@ public class CombineShares extends JDialog implements ActionListener
             sharei[shareNum]
                     .setEchoChar (this.showShareButton[shareNum].isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
         }
-
-        if ("show_button".equals (command))
+        if ((command).matches ("locate_share_button[0-9]{1,2}"))
         {
-            this.passwordField.setEchoChar (this.showPasswordButton.isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
+            locateShareFile(command);
         }
-        if ("copy_button".equals (command))
+        if ("Submit_Shares".equals (command))
         {
-            copyEntryField (JPassFrame.getInstance (), String.valueOf (this.passwordField.getPassword ()));
-        }
-        if ("Locate_File".equals (command))
-        {
-//            final String username = MessageDialog.showUsernameDialog (JPassFrame.getInstance (), true);
-//            final File dbFile = (username == null ? null : FileHelper.filePath ("resources/database/", username + ".jpass"));
-//            final File passFile = (username == null ? null : FileHelper.filePath ("resources/database/", username + ".stPassword"));
-            final File dbFile = FileHelper.showFileChooser(JPassFrame.getInstance (), "Open", new String[]{"jpass"}, "JPass Data Files (*.jpass)");
-            String jpassFilePath = (dbFile == null ? null : dbFile.getPath ());
-            String strPassFile = (jpassFilePath == null ? null : jpassFilePath.substring (0,
-                                                                                    jpassFilePath.lastIndexOf (".")) + ".stPassword");
-
-            /*if (strPassFile != null)
-            {
-                final File passFile = new File (strPassFile);
-                if (passFile.exists ())
-                {
-                    this.filename.setText (dbFile.getName ());
-                    filePath = dbFile.getPath ();
-                }
-                else
-                {
-                    MessageDialog.showWarningMessage (JPassFrame.getInstance (), "Couldn't find the .stPassword file, " +
-                                                                                 "Please place it in the same folder " +
-                                                                                 "as the .jpass file");
-                }
-            }*/
+            submitShares ();
         }
     }
 
-    public void insertShares ()
+    /**
+     * To update the window when "Submit" button clicked, meaning submitting Prime Number.
+     */
+    public void submitPrime ()
     {
         boolean disableSubmitButton = true;
         try
@@ -226,11 +160,6 @@ public class CombineShares extends JDialog implements ActionListener
                 MessageDialog.showWarningMessage (this, "you must entered a wrong Prime Number.");
                 disableSubmitButton = false;
             }
-            /*else if (this.filename.getText ().isEmpty ())
-            {
-                MessageDialog.showWarningMessage (this, "Please locate the file name.");
-                disableSubmitButton = false;
-            }*/
             else
             {
                 String strNumOfShares = coPrimeNum.substring (0, coPrimeNum.indexOf ("P:"));
@@ -300,6 +229,9 @@ public class CombineShares extends JDialog implements ActionListener
         }
     }
 
+    /**
+     * To submit the share values and display the secret on the screen.
+     */
     public void submitShares ()
     {
         boolean disableSubmitButton = true;
@@ -343,13 +275,6 @@ public class CombineShares extends JDialog implements ActionListener
             }
             else
             {
-                // this FOR Loop is just to loop through all the shares and invoke an exception in case that any of
-                // them is not starting with "#:"
-//                for (JPasswordField share : sharei)
-//                {
-//                    String coShareStr = String.valueOf (share.getPassword ()).trim ();
-//                    int shareNum = Integer.parseInt (coShareStr.substring (0, coShareStr.indexOf (":")));
-//                }
 
                 combineShamirShares ();
 
@@ -361,46 +286,17 @@ public class CombineShares extends JDialog implements ActionListener
                 secret.setEditable (false);
                 secretPanel.add (secret);
 
-                /*JPanel copySecretPanel = new JPanel (new SpringLayout ());
-                JButton copySecretButton = new JButton ("Copy", MessageDialog.getIcon ("accept"));
-                copySecretButton.setActionCommand ("Copy_Secret");
-                copySecretButton.setMnemonic (KeyEvent.VK_G);
-                copySecretButton.addActionListener (this);
-                copySecretPanel.add (copySecretButton);*/
-
                 SpringUtilities.makeCompactGrid (secretPanel,
                                                  2, 1, //rows, columns
                                                  5, 5, //initX, initY
                                                  5, 5);    //xPad, yPad
-
-                /*SpringUtilities.makeCompactGrid (copySecretPanel,
-                                                 1, 1, //rows, columns
-                                                 170, 5, //initX, initY
-                                                 5, 5);    //xPad, yPad*/
 
                 getContentPane ().add (secretPanel, BorderLayout.CENTER);
 
                 getContentPane ().remove (sharesPanelJScrollPane);
                 getContentPane ().remove (this.passwordPanel);
                 getContentPane ().add (secretPanel, BorderLayout.CENTER);
-//                getContentPane ().add (copySecretPanel, BorderLayout.SOUTH);
                 revalidate ();
-
-
-                /*try
-                {
-//                    String filenameStr = this.filename.getText ().trim ();
-//                    String username = filenameStr.substring (0, filenameStr.indexOf (".jpass"));
-                    byte[] ndPasswordHash = CryptUtils.getPKCS5Sha256Hash (passwordStr.toCharArray ());
-                    byte[] stPasswordHash = FileHelper.openPasswordDoc (ndPasswordHash, filePath, ".stPassword");
-                    FileHelper.doOpenFile (filePath , JPassFrame.getInstance (), true, stPasswordHash);
-                }
-                catch (Exception e)
-                {
-                    MessageDialog.showErrorMessage (JPassFrame.getInstance (),
-                                                    "Cannot generate password hash:\n" + StringUtils.stripString (e.getMessage ()) + "\n\nOpening and saving files are not possible!");
-                }
-                dispose();*/
             }
         } catch (NumberFormatException | StringIndexOutOfBoundsException ex)
         {
@@ -415,6 +311,10 @@ public class CombineShares extends JDialog implements ActionListener
         }
     }
 
+    /**
+     * To load the share value from the selected share file
+     * @param shareName - The share name
+     */
     public void locateShareFile (String shareName)
     {
         int shareNum = 0;
@@ -468,6 +368,9 @@ public class CombineShares extends JDialog implements ActionListener
         }
     }
 
+    /**
+     * To load the Prime value from the selected share file
+     */
     private void locatePrimeFile ()
     {
         final File primeFile = FileHelper
@@ -515,6 +418,9 @@ public class CombineShares extends JDialog implements ActionListener
         }
     }
 
+    /**
+     * To combine shares and reveal the secret.
+     */
     private void combineShamirShares ()
     {
         int avaSharesNum = numOfShares;

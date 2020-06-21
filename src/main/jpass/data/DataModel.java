@@ -49,7 +49,6 @@ public class DataModel {
 
     private Entries entries = new Entries();
     private String fileName = null;
-    private String username = null;
     private byte[] password = null;
     private boolean modified = false;
 
@@ -106,26 +105,6 @@ public class DataModel {
     }
 
     /**
-     * Gets the username for the data model.
-     *
-     * @return username
-     */
-//    public final String getUsername() {
-//        return this.username;
-//    }
-
-    /**
-     * Sets the username for the data model.
-     *
-     * @param username file name
-     */
-    /*public final void setUsername(final String username)
-    {
-        this.username = username;
-        MessageDialog.isUserExist (username, true);
-    }*/
-
-    /**
      * Gets the modified state of the data model.
      *
      * @return modified state of the data model
@@ -148,7 +127,7 @@ public class DataModel {
     }
 
     public void setPassword(byte[] password) {
-        this.password = password;
+        this.password = password.clone ();
     }
 
     /**
@@ -157,7 +136,6 @@ public class DataModel {
     public final void clear() {
         this.entries.getEntry().clear();
         this.fileName = null;
-        this.username = null;
         this.password = null;
         this.modified = false;
     }

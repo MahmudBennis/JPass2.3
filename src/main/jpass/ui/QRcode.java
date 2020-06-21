@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -25,59 +26,53 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+/**
+ * QR code class for Generating and Reading QR codes.
+ *
+ * @author Mahmud Ibr Bennis.
+ *
+ */
 public class QRcode
 {
-
-    public static void generateQRcode(String qrCodeData, String filePath, String charset)
+    /**
+     * Generating the QR code.
+     * @param qrCodeData - The data that need to be hidden into the QR code.
+     * @param filePath - The file path where the generated QR code will be saved.
+     */
+    public static void generateQRcode(String qrCodeData, String filePath)
     {
 
         try {
-//            String qrCodeData = "www.chillyfacts.com";
-//            String filePath = "D:\\QRCODE\\chillyfacts.png";
-////            String charset = "UTF-8"; // or "ISO-8859-1"
-
             Map < EncodeHintType, ErrorCorrectionLevel > hintMap = new HashMap < EncodeHintType, ErrorCorrectionLevel > ();
             hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-            BitMatrix matrix = new MultiFormatWriter().encode(
-                    new String(qrCodeData.getBytes(charset), charset),
-                    BarcodeFormat.QR_CODE, 500, 500, hintMap);
+            final var contents = new String (qrCodeData.getBytes (Charset.defaultCharset ()), Charset.defaultCharset ());
+            BitMatrix matrix = new MultiFormatWriter().encode (contents, BarcodeFormat.QR_CODE, 500, 500, hintMap);
             MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath
                                                                                .lastIndexOf('.') + 1), new File(filePath));
-//
-//            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-//            BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 470, 470);
-//            Path path = FileSystems.getDefault ().getPath (filePath);
-//            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
             int dec = 10;
             while (!qrCodeValid (filePath) || Objects.requireNonNull (readQRcode (filePath)).length () < 20)
             {
-                matrix = new MultiFormatWriter().encode(
-                        new String(qrCodeData.getBytes(charset), charset),
-                        BarcodeFormat.QR_CODE, 500-dec, 500-dec, hintMap);
+                matrix = new MultiFormatWriter().encode(contents, BarcodeFormat.QR_CODE, 500-dec, 500-dec, hintMap);
                 MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath
                                                                                    .lastIndexOf('.') + 1), new File(filePath));
-//                System.out.println (filePath + " >> incorrect " + dec);
-//                bitMatrix = qrCodeWriter.encode(qrCodeData, BarcodeFormat.QR_CODE, 470-dec, 470-dec);
-//                path = FileSystems.getDefault ().getPath (filePath);
-//                MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
                 dec+=10;
             }
 
 
         } catch (Exception e) {
-            System.err.println(e);
+            System.err.println(e.getMessage ());
         }
     }
 
+    /**
+     * Reading the QR code.
+     * @param filePath - The file path where the QR code is stored.
+     * @return - returns the text of the QR code.
+     */
     public static String readQRcode (String filePath)
     {
         Result qrCodeResult = null;
         try {
-//            String filePath = "D:\\QRCODE\\chillyfacts.png";
-//            String charset = "UTF-8";
-//            Map < EncodeHintType, ErrorCorrectionLevel > hintMap = new HashMap < EncodeHintType, ErrorCorrectionLevel > ();
-//            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-//            System.out.println("Data read from QR Code: " + readQRCode(filePath, charset, hintMap));
             BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(
                     new BufferedImageLuminanceSource(ImageIO.read(new FileInputStream(filePath)))));
             qrCodeResult = new MultiFormatReader().decode(binaryBitmap);
@@ -87,6 +82,11 @@ public class QRcode
         return (qrCodeResult != null ? qrCodeResult.getText() : null);
     }
 
+    /**
+     * Checking whether the generated QR code is valid or not.
+     * @param filePath - The file path.
+     * @return - returns True it is valid, and False if it is not.
+     */
     public static boolean qrCodeValid (String filePath)
     {
         Result qrCodeResult = null;

@@ -14,12 +14,19 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 
 import javax.swing.*;
 
 import static main.jpass.ui.helper.EntryHelper.copyEntryField;
 
+/**
+ * Generate Shares class for generating shares.
+ *
+ * @author Mahmud Ibr Bennis.
+ *
+ */
 public class GenerateShares extends JDialog implements ActionListener
 {
     private static final long serialVersionUID = -8551022862532925034L;
@@ -32,7 +39,7 @@ public class GenerateShares extends JDialog implements ActionListener
     private final JTextField totalShares;
     private final JTextField neededShares;
     private final JButton generatePasswordButton;
-    private  JButton[] copyShareButton;
+    private JButton[] copyShareButton;
     private JButton copyAllButton;
     private JButton exportButton;
     private JButton generateSharesButton;
@@ -55,9 +62,13 @@ public class GenerateShares extends JDialog implements ActionListener
     private char ORIGINAL_ECHO;
     private static final char NULL_ECHO = '\0';
 
-    private JPassFrame parent;
+    private final JPassFrame parent;
 
-
+    /**
+     * The class constructor, which builds the Generate Shares window.
+     * @param parent - The parent frame.
+     * @param title - The Window title.
+     */
     public GenerateShares (final JPassFrame parent, final String title)
     {
         super(parent, title, true);
@@ -134,23 +145,13 @@ public class GenerateShares extends JDialog implements ActionListener
         setVisible(true);
     }
 
-    private void setFormData(Entry formData)
-    {
-        this.formData = formData;
-    }
-
-    public Entry getFormData ()
-    {
-        return this.formData;
-    }
-
     @Override
     public void actionPerformed (ActionEvent e)
     {
         String command = e.getActionCommand ();
-        if ("generate_shares_button".equals (command))
+        if ("show_button".equals (command))
         {
-            generateShares ();
+            this.passwordField.setEchoChar(this.showPasswordButton.isSelected() ? NULL_ECHO : this.ORIGINAL_ECHO);
         }
         if ("generate_Password_button".equals (command))
         {
@@ -161,9 +162,37 @@ public class GenerateShares extends JDialog implements ActionListener
                 this.passwordField.setText (generatedPassword);
             }
         }
-        if ("show_button".equals (command))
+        if ("generate_shares_button".equals (command))
         {
-            this.passwordField.setEchoChar(this.showPasswordButton.isSelected() ? NULL_ECHO : this.ORIGINAL_ECHO);
+            generateShares ();
+        }
+        if ("export_button".equals (command))
+        {
+            writingShares();
+            MessageDialog.showInformationMessage (parent, "All shares has been exported into \"database\" file");
+        }
+        if ("show_prime_button".equals (command))
+        {
+            this.primeNum.setEchoChar(this.showPrimeButton.isSelected() ? NULL_ECHO : this.ORIGINAL_ECHO);
+        }
+        if ("copy_prime_button".equals (command))
+        {
+            copyEntryField (parent, String.valueOf (this.primeNum.getPassword ()));
+        }
+        if ((command).matches ("show_share_button[0-9]{1,2}"))
+        {
+            int shareNum = 0;
+            StringBuilder sb = new StringBuilder ();
+            for (int i = 0; i < command.length (); i++)
+            {
+                final char c = command.charAt (i);
+                if (c > 47 && c < 58)
+                {
+                    sb.append (c);
+                }
+            }
+            shareNum = Integer.parseInt (String.valueOf (sb));
+            sharei[shareNum].setEchoChar (this.showShareButton[shareNum].isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
         }
         if ((command).matches ("copy_share_button[0-9]{1,2}"))
         {
@@ -181,40 +210,15 @@ public class GenerateShares extends JDialog implements ActionListener
 
             copyEntryField(parent, String.valueOf(sharei[shareNum].getPassword()));
         }
-        if ((command).matches ("show_share_button[0-9]{1,2}"))
-        {
-            int shareNum = 0;
-            StringBuilder sb = new StringBuilder ();
-            for (int i = 0; i < command.length (); i++)
-            {
-                final char c = command.charAt (i);
-                if (c > 47 && c < 58)
-                {
-                    sb.append (c);
-                }
-            }
-            shareNum = Integer.parseInt (String.valueOf (sb));
-            sharei[shareNum].setEchoChar (this.showShareButton[shareNum].isSelected () ? NULL_ECHO : this.ORIGINAL_ECHO);
-        }
-        if ("show_prime_button".equals (command))
-        {
-            this.primeNum.setEchoChar(this.showPrimeButton.isSelected() ? NULL_ECHO : this.ORIGINAL_ECHO);
-        }
-        if ("copy_prime_button".equals (command))
-        {
-            copyEntryField (parent, String.valueOf (this.primeNum.getPassword ()));
-        }
         if ("copy_all_button".equals (command))
         {
             copyEntryField (parent, String.valueOf (primeAndAllShares) );
         }
-        if ("export_button".equals (command))
-        {
-            writingShares();
-            MessageDialog.showInformationMessage (parent, "All shares has been exported into \"database\" file");
-        }
     }
 
+    /**
+     * To update the window when "Submit" button clicked
+     */
     public void generateShares ()
     {
         try
@@ -250,7 +254,7 @@ public class GenerateShares extends JDialog implements ActionListener
             }
             else if (nedShares.isEmpty ())
             {
-                int totNuShares = Integer.parseInt (totShares); //to invoke the Exception if "totShares" was a String.
+                Integer.parseInt (totShares); // this line is just to invoke the Exception if "totShares" was a String.
                 MessageDialog.showWarningMessage(this, "Please specify the number of needed password shares.");
             }
             else if (Integer.parseInt (nedShares) >= Integer.parseInt (totShares))
@@ -351,6 +355,9 @@ public class GenerateShares extends JDialog implements ActionListener
         }
     }
 
+    /**
+     * To Generate the Share values.
+     */
     private void generateShamirShares ()
     {
         String secretWithLink =
@@ -373,7 +380,6 @@ public class GenerateShares extends JDialog implements ActionListener
         String coPrimeNum = nedNuShares + "P:" + String.valueOf (prime);
         this.primeNum.setText (coPrimeNum);
 
-//        String username = parent.getModel ().getUsername ();
         StringBuilder primeAndShares = new StringBuilder (coPrimeNum);
 //        primeAndShares.append ("\n").append (coPrimeNum);
 
@@ -387,6 +393,9 @@ public class GenerateShares extends JDialog implements ActionListener
         primeAndAllShares = String.valueOf (primeAndShares);
     }
 
+    /**
+     * To Export all the Share values into a new folder, in both .txt and .png (QR code) format.
+     */
     private void writingShares ()
     {
         try
@@ -397,7 +406,7 @@ public class GenerateShares extends JDialog implements ActionListener
                 String strShareNum = String.valueOf (share.getPassword ()).substring (0,
                                                                                       String.valueOf (share.getPassword ()).indexOf (":"));
                 String fileName = filePath + "/Share#" + (strShareNum) + ".txt";
-                PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+                PrintWriter writer = new PrintWriter(fileName, Charset.defaultCharset ());
                 writer.println(primeNum.getPassword ());
                 writer.println ();
                 writer.println(share.getPassword ());
@@ -406,8 +415,7 @@ public class GenerateShares extends JDialog implements ActionListener
                 int intShareNum = Integer.parseInt (strShareNum);
                 QRcode.generateQRcode (String.valueOf(primeNum.getPassword()) + "\n" +
                                        String.valueOf(sharei[intShareNum-1].getPassword()),
-                                       sharesFilePath ()+"/share#"+intShareNum+"QRcode.png",
-                                       "UTF-8");
+                                       sharesFilePath ()+"/share#"+intShareNum+"QRcode.png");
             }
         } catch (FileNotFoundException e)
         {
@@ -415,9 +423,16 @@ public class GenerateShares extends JDialog implements ActionListener
         } catch (UnsupportedEncodingException e)
         {
             MessageDialog.showInformationMessage (parent, "The Encoding is nor supported");
+        } catch (IOException e)
+        {
+            MessageDialog.showInformationMessage (parent, e.getMessage ());
         }
     }
 
+    /**
+     * To return the shares's file path
+     * @return - returns share's file path.
+     */
     private String sharesFilePath ()
     {
         File ret = null;

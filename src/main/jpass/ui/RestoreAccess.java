@@ -13,16 +13,19 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-
+/**
+ * Restore Access class for restoring access to the database file.
+ *
+ * @author Mahmud Ibr Bennis.
+ *
+ */
 public class RestoreAccess extends JDialog implements ActionListener
 {
     private final JPanel fieldPanel;
     private final JPasswordField passwordField;
-    private JTextField dbFilename;
-    private JToggleButton showStPasswordButton;
+    private final JTextField dbFilename;
+    private final JToggleButton showStPasswordButton;
     private JButton locateDBFileButton;
-    private JTextField stPassFilename;
-    private JButton locateStPassFileButton;
     private JButton restoreAccessButton;
 
     String filePath;
@@ -32,7 +35,11 @@ public class RestoreAccess extends JDialog implements ActionListener
     private char ORIGINAL_ECHO;
     private static final char NULL_ECHO = '\0';
 
-
+    /**
+     * The class constructor, which builds the Restore Access window.
+     * @param parent - The parent frame.
+     * @param title - The Window title.
+     */
     public RestoreAccess (final JPassFrame parent, final String title)
     {
         super (parent, title, true);
@@ -64,17 +71,6 @@ public class RestoreAccess extends JDialog implements ActionListener
         this.locateDBFileButton.addActionListener (this);
         this.fieldPanel.add (this.locateDBFileButton);
 
-        /*this.fieldPanel.add (new JLabel ("The .stPassword file:"));
-        this.stPassFilename = TextComponentFactory.newTextField ();
-        this.stPassFilename.setEditable (false);
-        this.fieldPanel.add (this.stPassFilename);
-
-        this.locateStPassFileButton = new JButton ("Locate file", MessageDialog.getIcon ("accept"));
-        this.locateStPassFileButton.setActionCommand ("Locate_stPassFile");
-        this.locateStPassFileButton.setMnemonic (KeyEvent.VK_G);
-        this.locateStPassFileButton.addActionListener (this);
-        this.fieldPanel.add (this.locateStPassFileButton);*/
-
         this.fieldPanel.add (new JLabel (""));
         this.restoreAccessButton = new JButton ("Restore Access", MessageDialog.getIcon ("accept"));
         this.restoreAccessButton.setActionCommand ("Restore_Access");
@@ -94,16 +90,6 @@ public class RestoreAccess extends JDialog implements ActionListener
         setMinimumSize (new Dimension (370, 300));
         setLocationRelativeTo (parent);
         setVisible (true);
-    }
-
-    private void setFormData (Entry formData)
-    {
-        this.formData = formData;
-    }
-
-    public Entry getFormData ()
-    {
-        return this.formData;
     }
 
     @Override
@@ -143,6 +129,9 @@ public class RestoreAccess extends JDialog implements ActionListener
         }
     }
 
+    /**
+     * Restoring access to the database file
+     */
     public void restoreAccess ()
     {
         try

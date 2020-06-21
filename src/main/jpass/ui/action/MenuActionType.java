@@ -101,7 +101,6 @@ public enum MenuActionType {
         public void actionPerformed(ActionEvent ev)
         {
             EntryHelper.generateShares (JPassFrame.getInstance());
-            //JPassFrame.getInstance().getSearchPanel().setVisible(true);
         }
     }),
     COMBINE_SHARES(new AbstractMenuAction("Reveal Secret", getIcon("com_password4"), getKeyStroke(KeyEvent.VK_F,
@@ -112,7 +111,6 @@ public enum MenuActionType {
         public void actionPerformed(ActionEvent ev)
         {
             EntryHelper.combineShares (JPassFrame.getInstance());
-            //JPassFrame.getInstance().getSearchPanel().setVisible(true);
         }
     }),
     RESTORE_ACCESS(new AbstractMenuAction("Restore Access", getIcon("Restore_Access"), getKeyStroke(KeyEvent.VK_F,
@@ -123,7 +121,6 @@ public enum MenuActionType {
         public void actionPerformed(ActionEvent ev)
         {
             EntryHelper.restoreAccess (JPassFrame.getInstance());
-            //JPassFrame.getInstance().getSearchPanel().setVisible(true);
         }
     }),
     EXPORT_XML(new AbstractMenuAction("Export to XML...", getIcon("export"), null) {
@@ -146,49 +143,9 @@ public enum MenuActionType {
         private static final long serialVersionUID = 616220526614500130L;
 
         @Override
-        public void actionPerformed(ActionEvent ev) {
-            try
-            {
-                JPassFrame parent = JPassFrame.getInstance();
-//                String username = parent.getModel ().getUsername ();
-                String jpassFilePath = JPassFrame.getInstance ().getModel ().getFileName ();
-                String fileName = jpassFilePath.substring (0,jpassFilePath.lastIndexOf ("."));
-                String strStPassFile = fileName + ".stPassword";
-                final File stPassFile = new File (strStPassFile);
-                byte[] stPasswordHash = parent.getModel ().getPassword ();
-                byte[] ndPasswordHash = openPasswordDoc (stPasswordHash, jpassFilePath,".ndPassword");
-                if (ndPasswordHash == null && stPassFile.exists ())
-                    MessageDialog.showWarningMessage (parent,
-                                                      "Sorry, we couldn't locate the \".ndPassword\" file. Please " +
-                                                      "place it at the same directory as the \".jpass\" and \"" +
-                                                      ".stPassword\" files.\n\nNote: If you still want to change your" +
-                                                      " Master Password, you have to either:" +
-                                                      " Generate a new shares and redistribute them again \nOr " +
-                                                      "Deleting the \".stPassword\" file, but remember by deleting it" +
-                                                      " the access to the database encrypted file can not be " +
-                                                      "recovered from shares anymore.");
-                else
-                {
-                    stPasswordHash = MessageDialog.showPasswordDialog(parent, true);
-                    if (stPasswordHash == null) {
-                        MessageDialog.showInformationMessage(parent, "Password has not been modified.");
-                    }
-                    else {
-                        parent.getModel().setPassword(stPasswordHash);
-                        parent.getModel().setModified(true);
-                        parent.refreshFrameTitle();
-                        savePassword (ndPasswordHash, stPasswordHash,".stPassword", false);
-                        savePassword (stPasswordHash, ndPasswordHash,".ndPassword", false);
-                        saveFile (parent, false,result -> {});
-                        MessageDialog.showInformationMessage(parent,
-                                                             "Password has been successfully modified.\n\nSave the file now in order to\nget the new password applied.");
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace ();
-            }
+        public void actionPerformed(ActionEvent ev)
+        {
+            EntryHelper.changePassword (JPassFrame.getInstance());
         }
     }),
     GENERATE_PASSWORD(new AbstractMenuAction("Generate Password...", getIcon("generate"), getKeyStroke(KeyEvent.VK_Z, CTRL_DOWN_MASK)) {

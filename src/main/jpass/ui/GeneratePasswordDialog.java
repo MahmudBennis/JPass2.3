@@ -137,7 +137,7 @@ public final class GeneratePasswordDialog extends JDialog implements ActionListe
         this.lengthLabel = new JLabel("Password length:");
         this.lengthPanel.add(this.lengthLabel);
 
-        int passwordGenerationLength = Configuration.getInstance().getInteger("default.password.generation.length", 14);
+        int passwordGenerationLength = Configuration.getInstance().getInteger("default.password.generation.length", 20);
         if (passwordGenerationLength > 64) {
             passwordGenerationLength = 64;
         }

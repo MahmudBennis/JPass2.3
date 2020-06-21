@@ -34,6 +34,10 @@ import main.jpass.util.ClipboardUtils;
 import main.jpass.xml.bind.Entry;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import java.io.File;
+
+import static main.jpass.ui.helper.FileHelper.*;
+
 /**
  * Helper class for entry operations.
  *
@@ -172,7 +176,8 @@ public final class EntryHelper
     }
 
     /**
-     *
+     * Generating Shares.
+     * @param parent  the parent frame
      */
     public static void generateShares (JPassFrame parent)
     {
@@ -189,18 +194,14 @@ public final class EntryHelper
                                                           "Note: You don't have to remember your second Master " +
                                                           "Password.");
 
-            GenerateShares gs = new GenerateShares (JPassFrame.getInstance (), "Generate Secret Shares");
-
-            if (gs.getFormData () != null)
-            {
-                JPassFrame.getInstance ().getModel ().getEntries ().getEntry ().add (gs.getFormData ());
-                JPassFrame.getInstance ().getModel ().setModified (true);
-                JPassFrame.getInstance ().refreshFrameTitle ();
-                JPassFrame.getInstance ().refreshEntryTitleList (gs.getFormData ().getTitle ());
-            }
+            new GenerateShares (JPassFrame.getInstance (), "Generate Secret Shares");
         }
     }
 
+    /**
+     * Combining Shares to reveal the user's secret.
+     * @param parent  the parent frame
+     */
     public static void combineShares (JPassFrame parent)
     {
         MessageDialog.showInformationMessage (parent, "You can type-in, copy&paste or locate the share file " +
@@ -208,30 +209,70 @@ public final class EntryHelper
                                                       "Note: For the Prime number field, you can select " +
                                                       "any Share file (.txt or .png) and the Prime number will be " +
                                                       "extracted for it.");
-        CombineShares cs = new CombineShares (JPassFrame.getInstance (), "Reveal Secret");
-
-        if (cs.getFormData () != null)
-        {
-            JPassFrame.getInstance ().getModel ().getEntries ().getEntry ().add (cs.getFormData ());
-            JPassFrame.getInstance ().getModel ().setModified (true);
-            JPassFrame.getInstance ().refreshFrameTitle ();
-            JPassFrame.getInstance ().refreshEntryTitleList (cs.getFormData ().getTitle ());
-        }
+        new CombineShares (JPassFrame.getInstance (), "Reveal Secret");
     }
 
+    /**
+     * Restoring access to the database file.
+     * @param parent  the parent frame
+     */
     public static void restoreAccess (JPassFrame parent)
     {
-        RestoreAccess ra = new RestoreAccess (JPassFrame.getInstance (), "Restore Access");
+        new RestoreAccess (JPassFrame.getInstance (), "Restore Access");
+    }
 
-        if (ra.getFormData () != null)
+    /**
+     * Changing the user's Master Password.
+     */
+    public static void changePassword (JPassFrame parent)
+    {
+        try
         {
-            JPassFrame.getInstance ().getModel ().getEntries ().getEntry ().add (ra.getFormData ());
-            JPassFrame.getInstance ().getModel ().setModified (true);
-            JPassFrame.getInstance ().refreshFrameTitle ();
-            JPassFrame.getInstance ().refreshEntryTitleList (ra.getFormData ().getTitle ());
+            String jpassFilePath = parent.getModel ().getFileName ();
+            String fileName = jpassFilePath.substring (0,jpassFilePath.lastIndexOf ("."));
+            String strStPassFile = fileName + ".stPassword";
+            final File stPassFile = new File (strStPassFile);
+            byte[] stPasswordHash = parent.getModel ().getPassword ();
+            byte[] ndPasswordHash = openPasswordDoc (stPasswordHash, jpassFilePath,".ndPassword");
+            if (ndPasswordHash == null && stPassFile.exists ())
+                MessageDialog.showWarningMessage (parent,
+                                                  "Sorry, we couldn't locate the \".ndPassword\" file. Please " +
+                                                  "place it at the same directory as the \".jpass\" and \"" +
+                                                  ".stPassword\" files.\n\nNote: If you still want to change your" +
+                                                  " Master Password, you have to either:" +
+                                                  " Generate a new shares and redistribute them again \nOr " +
+                                                  "Deleting the \".stPassword\" file, but remember by deleting it" +
+                                                  " the access to the database encrypted file can not be " +
+                                                  "recovered from shares anymore.");
+            else
+            {
+                stPasswordHash = MessageDialog.showPasswordDialog(parent, true);
+                if (stPasswordHash == null) {
+                    MessageDialog.showInformationMessage(parent, "Password has not been modified.");
+                }
+                else {
+                    parent.getModel().setPassword(stPasswordHash);
+                    parent.getModel().setModified(true);
+                    parent.refreshFrameTitle();
+                    savePassword (ndPasswordHash, stPasswordHash,".stPassword", false);
+                    savePassword (stPasswordHash, ndPasswordHash,".ndPassword", false);
+                    saveFile (parent, false,result -> {});
+                    MessageDialog.showInformationMessage(parent,
+                                                         "Password has been successfully modified.\n\nSave the file now in order to\nget the new password applied.");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace ();
         }
     }
 
+    /**
+     * Checking whether the given Link is valid or not.
+     * @param link The link in question.
+     * @return True if the link is valid, and False if it is not.
+     */
     public static boolean isLinkValid (String link)
     {
         String[] schemes = {"http","https"}; // DEFAULT schemes = "http", "https", "ftp"
