@@ -28,10 +28,16 @@
  */
 package main.jpass.util;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+//import java.util.Base64;
+import java.util.Arrays;
 import java.util.Random;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Crypto related utility class.
@@ -52,9 +58,9 @@ public final class CryptUtils {
      * @return hash of the password
      * @throws Exception if error occurred
      */
-    public static byte[] getPKCS5Sha256Hash(final char[] text) throws Exception {
+    /*public static byte[] getPKCS5Sha256Hash(final char[] text) throws Exception {
         return getSha256Hash(text, 1000);
-    }
+    }*/
 
     /**
      * Calculate SHA-256 hash.
@@ -97,6 +103,32 @@ public final class CryptUtils {
         }
         return digest;
     }
+
+    ////////////////////////////////////////////
+    public static byte[] getPKCS5Sha256Hash(final char[] text) throws Exception {
+        return getSaltedHash (Arrays.toString (text));
+    }
+    private static final int iterations = 20*1000;
+    private static final int desiredKeyLen = 256;
+
+    /**
+     * Computes a salted PBKDF2 hash of given plaintext password
+     *      suitable for storing in a database.
+     *      Empty passwords are not supported.
+     * @param password - password to be hashed
+     * @return - returns the password hash
+     * @throws Exception - if error occurred
+     */
+    private static byte [] getSaltedHash(String password) throws Exception {
+        if (password == null || password.length() == 0)
+            throw new IllegalArgumentException("Empty passwords are not supported.");
+        SecretKeyFactory f = SecretKeyFactory.getInstance ("PBKDF2WithHmacSHA1");
+        SecretKey key = f.generateSecret (new PBEKeySpec (
+                password.toCharArray(), password.getBytes (), iterations, desiredKeyLen));
+        return Base64.encodeBase64(key.getEncoded());
+    }
+    ////////////////////////////////////////////
+
 
     /**
      * Get random number generator.
