@@ -38,22 +38,14 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.sun.source.tree.WhileLoopTree;
-import main.jpass.ui.helper.FileHelper;
 import main.jpass.util.CryptUtils;
 import main.jpass.util.SpringUtilities;
 import main.jpass.util.StringUtils;
@@ -289,7 +281,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
 
         byte[] passwordHash = null;
         try {
-            passwordHash = CryptUtils.getPKCS5Sha256Hash(password.getPassword());
+            passwordHash = CryptUtils.getPBKDF2Hash (password.getPassword ());
         } catch (Exception e) {
             showErrorMessage(parent,
                              "Cannot generate password hash:\n" + StringUtils.stripString(e.getMessage()) + "\n\nOpening and saving files are not possible!");

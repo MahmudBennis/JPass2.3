@@ -285,7 +285,7 @@ public class GenerateShares extends JDialog implements ActionListener
                 totNuShares = Integer.parseInt (totShares);
                 nedNuShares = Integer.parseInt (nedShares);
 
-                byte[] ndPasswordHash = CryptUtils.getPKCS5Sha256Hash (secMasterPassword.toCharArray ());
+                byte[] ndPasswordHash = CryptUtils.getPBKDF2Hash (secMasterPassword.toCharArray ());
                 byte[] stPasswordHash = parent.getModel ().getPassword ();
                 FileHelper.savePassword (ndPasswordHash, stPasswordHash,".stPassword", true);
                 FileHelper.savePassword (stPasswordHash, ndPasswordHash,".ndPassword", true);

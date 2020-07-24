@@ -143,7 +143,7 @@ public class RestoreAccess extends JDialog implements ActionListener
                 MessageDialog.showWarningMessage(this, "Please fill the \"Database File\" field.");
             else
             {
-                byte[] ndPasswordHash = CryptUtils.getPKCS5Sha256Hash (secMasterPassword.toCharArray ());
+                byte[] ndPasswordHash = CryptUtils.getPBKDF2Hash (secMasterPassword.toCharArray ());
                 byte[] stPasswordHash = FileHelper.openPasswordDoc (ndPasswordHash, filePath, ".stPassword");
                 FileHelper.doOpenFile (filePath , JPassFrame.getInstance (), true, stPasswordHash);
                 dispose();
